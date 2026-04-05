@@ -1,0 +1,268 @@
+
+/* 所有尺寸与 light-fit.html 对齐 */
+.page.data-v-2c5296db {
+  padding: 16px;
+  padding-bottom: 80px;
+  background: #f5f7f5;
+  min-height: 100vh;
+}
+
+/* 头部 - sticky 固定在顶部 */
+.header.data-v-2c5296db {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #f5f7f5;
+  text-align: center;
+  padding: 6px 0;
+  margin: 0 -16px 0;
+}
+.title.data-v-2c5296db {
+  display: block;
+  font-size: 16px;
+  color: #2ecc71;
+  font-weight: 600;
+}
+.sub.data-v-2c5296db {
+  display: block;
+  color: #7f8c8d;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* 卡片 */
+.card.data-v-2c5296db {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.card-title.data-v-2c5296db {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 今日概览卡片 */
+.today-card.data-v-2c5296db { text-align: center;
+}
+.deficit-display.data-v-2c5296db {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0;
+}
+.deficit-circle.data-v-2c5296db {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+.circle-canvas.data-v-2c5296db {
+  width: 160px;
+  height: 160px;
+}
+.deficit-value.data-v-2c5296db {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.deficit-num.data-v-2c5296db {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2ecc71;
+}
+.deficit-sub.data-v-2c5296db {
+  display: block;
+  font-size: 13px;
+  color: #95a5a6;
+  margin-top: 2px;
+}
+.burn-val.data-v-2c5296db {
+  font-weight: 600;
+  color: #7f8c8d;
+}
+.circle-label.data-v-2c5296db {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+.circle-legend.data-v-2c5296db {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.legend-item.data-v-2c5296db {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+.legend-dot.data-v-2c5296db {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.legend-dot.intake.data-v-2c5296db { background: #e74c3c;
+}
+.legend-dot.exercise.data-v-2c5296db { background: #2ecc71;
+}
+.legend-dot.excess.data-v-2c5296db { background: #8e1a1a;
+}
+.legend-dot.target.data-v-2c5296db {
+  background: #3498db;
+  border-radius: 2px;
+  width: 4px;
+  height: 10px;
+}
+
+/* 三列统计 */
+.stats-row.data-v-2c5296db {
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  margin-top: 12px;
+}
+.stat-item.data-v-2c5296db { text-align: center;
+}
+.stat-label.data-v-2c5296db {
+  display: block;
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+}
+.stat-val.data-v-2c5296db {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+.stat-unit.data-v-2c5296db {
+  display: block;
+  font-size: 11px;
+  color: #95a5a6;
+}
+
+/* AI 鼓励 */
+.ai-card.data-v-2c5296db {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.ai-avatar.data-v-2c5296db {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.ai-bubble.data-v-2c5296db {
+  flex: 1;
+  background: #e8f5e9;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #2c3e50;
+  line-height: 1.5;
+}
+
+/* 快速记录 */
+.quick-grid.data-v-2c5296db {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.quick-btn.data-v-2c5296db {
+  padding: 12px 8px;
+  border: none;
+  border-radius: 12px;
+  background: #e8f5e9 !important;
+  color: #2ecc71;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  min-height: auto;
+}
+/* 覆盖 uni-app button 默认伪元素边框 */
+.quick-btn.data-v-2c5296db::after {
+  border: none !important;
+  border-radius: 12px;
+}
+.quick-btn.data-v-2c5296db:active {
+  background: #2ecc71 !important;
+  color: #fff;
+}
+
+/* 今日记录 */
+.today-records.data-v-2c5296db { margin-bottom: 80px;
+}
+.record-item.data-v-2c5296db {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.record-item.data-v-2c5296db:last-child { border-bottom: none;
+}
+.record-icon.data-v-2c5296db {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.record-icon.intake.data-v-2c5296db { background: #fde8e8; color: #e74c3c;
+}
+.record-icon.exercise.data-v-2c5296db { background: #e8f5e9; color: #2ecc71;
+}
+.record-info.data-v-2c5296db { flex: 1;
+}
+.record-name.data-v-2c5296db {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 2px;
+}
+.record-time.data-v-2c5296db {
+  display: block;
+  font-size: 12px;
+  color: #7f8c8d;
+}
+.record-calories.data-v-2c5296db {
+  font-size: 14px;
+  font-weight: 600;
+}
+.record-calories.intake.data-v-2c5296db { color: #e74c3c;
+}
+.record-calories.exercise.data-v-2c5296db { color: #2ecc71;
+}
+.empty-records.data-v-2c5296db {
+  text-align: center;
+  padding: 30px 0;
+  color: #bdc3c7;
+  font-size: 14px;
+}

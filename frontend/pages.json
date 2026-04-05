@@ -1,0 +1,77 @@
+{
+  "pages": [
+    {
+      "path": "src/pages/login/index",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "src/pages/home/index",
+      "style": {
+        "navigationBarTitleText": "轻享瘦",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "src/pages/record/index",
+      "style": {
+        "navigationBarTitleText": "记录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "src/pages/stats/index",
+      "style": {
+        "navigationBarTitleText": "统计",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "src/pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationStyle": "custom"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#2ecc71",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "src/pages/home/index",
+        "text": "首页",
+        "iconPath": "static/tabs/home.png",
+        "selectedIconPath": "static/tabs/home-active.png"
+      },
+      {
+        "pagePath": "src/pages/record/index",
+        "text": "记录",
+        "iconPath": "static/tabs/record.png",
+        "selectedIconPath": "static/tabs/record-active.png"
+      },
+      {
+        "pagePath": "src/pages/stats/index",
+        "text": "统计",
+        "iconPath": "static/tabs/stats.png",
+        "selectedIconPath": "static/tabs/stats-active.png"
+      },
+      {
+        "pagePath": "src/pages/profile/index",
+        "text": "我的",
+        "iconPath": "static/tabs/profile.png",
+        "selectedIconPath": "static/tabs/profile-active.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarBackgroundColor": "#f5f7f5",
+    "backgroundColor": "#f5f7f5",
+    "backgroundTextStyle": "light"
+  }
+}

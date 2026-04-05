@@ -1,0 +1,2614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>轻享瘦 - 热量缺口管理</title>
+    <style>
+/* 基础样式重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: #f5f7f5;
+    color: #333;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 414px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #f5f7f5;
+    position: relative;
+    padding-bottom: 70px;
+}
+
+/* 页面切换 */
+.page {
+    display: none;
+    padding: 16px;
+    padding-bottom: 80px;
+}
+
+.page.active {
+    display: block;
+}
+
+/* 头部 */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #f5f7f5;
+    text-align: center;
+    padding: 6px 0;
+}
+
+.header h1 {
+    font-size: 16px;
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.header .subtitle {
+    color: #7f8c8d;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+/* 卡片样式 */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+/* 今日概览 - 圆环进度 */
+.today-summary {
+    text-align: center;
+}
+
+.deficit-display {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.deficit-circle {
+    position: relative;
+    width: 160px;
+    height: 160px;
+}
+
+.deficit-circle svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.deficit-circle circle {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+.deficit-circle circle.bg {
+    stroke: #eee;
+}
+
+.deficit-circle circle.intake {
+    stroke: #e74c3c;
+    stroke-dasharray: 251;
+    stroke-dashoffset: 251;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.deficit-circle circle.intake-excess {
+    stroke: #8e1a1a;
+    stroke-dasharray: 251.33;
+    stroke-dashoffset: 251.33;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.deficit-circle circle.exercise {
+    stroke: #2ecc71;
+    stroke-dasharray: 251;
+    stroke-dashoffset: 251;
+    transition: stroke-dashoffset 0.5s ease, stroke-dasharray 0.5s ease;
+}
+
+.deficit-circle .target-marker {
+    transition: transform 0.5s ease;
+}
+
+.deficit-circle .target-marker rect {
+    fill: #3498db;
+}
+
+.deficit-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.deficit-value .deficit-num {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #2ecc71;
+}
+
+.deficit-value .deficit-sub {
+    display: block;
+    font-size: 13px;
+    color: #95a5a6;
+    margin-top: 2px;
+}
+
+.deficit-value .deficit-sub .burn-val {
+    font-weight: 600;
+    color: #7f8c8d;
+}
+
+.deficit-value small {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.circle-label {
+    text-align: center;
+    font-size: 13px;
+    color: #7f8c8d;
+    margin-top: -8px;
+    margin-bottom: 8px;
+}
+
+.circle-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 12px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.legend-dot.intake {
+    background: #e74c3c;
+}
+
+.legend-dot.exercise {
+    background: #2ecc71;
+}
+
+.legend-dot.excess {
+    background: #8e1a1a;
+}
+
+.legend-dot.target {
+    background: #3498db;
+    border-radius: 2px;
+    width: 4px;
+    height: 10px;
+}
+
+/* 统计数据 */
+.summary-stats {
+    display: flex;
+    justify-content: space-around;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat .label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.stat .value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stat small {
+    font-size: 11px;
+    color: #95a5a6;
+}
+
+/* AI消息 */
+.ai-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.ai-avatar {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.ai-content {
+    flex: 1;
+    background: #e8f5e9;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+/* 快速记录按钮 */
+.quick-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.quick-btn {
+    padding: 12px 8px;
+    border: none;
+    border-radius: 12px;
+    background: #e8f5e9;
+    color: #2ecc71;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-btn:hover, .quick-btn:active {
+    background: #2ecc71;
+    color: #fff;
+}
+
+/* 今日记录列表 */
+.today-records {
+    margin-bottom: 80px;
+}
+
+#today-records-list {
+    /* 直接铺开，不限制高度 */
+}
+
+.record-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.record-item:last-child {
+    border-bottom: none;
+}
+
+.record-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.record-icon.intake {
+    background: #fde8e8;
+    color: #e74c3c;
+}
+
+.record-icon.exercise {
+    background: #e8f5e9;
+    color: #2ecc71;
+}
+
+.record-info {
+    flex: 1;
+}
+
+.record-name {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.record-time {
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+.record-calories {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.record-calories.intake {
+    color: #e74c3c;
+}
+
+.record-calories.exercise {
+    color: #2ecc71;
+}
+
+.empty-records {
+    text-align: center;
+    padding: 30px 0;
+    color: #bdc3c7;
+    font-size: 14px;
+}
+
+/* 聊天界面 */
+.chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+}
+
+.chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    display: flex;
+    gap: 10px;
+    max-width: 85%;
+}
+
+.message.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.message .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.message.ai .avatar {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+}
+
+.message.user .avatar {
+    background: #3498db;
+    color: #fff;
+}
+
+.message .content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message.ai .content {
+    background: #e8f5e9;
+}
+
+.message.user .content {
+    background: #3498db;
+    color: #fff;
+}
+
+.message .hint {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 6px;
+}
+
+.message.ai .content p {
+    margin-bottom: 6px;
+}
+
+.message.ai .content p:last-child {
+    margin-bottom: 0;
+}
+
+/* 聊天输入区域 - 微信风格 */
+.chat-input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f7f7f7;
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 414px;
+    margin: 0 auto;
+    border-top: 1px solid #e5e5e5;
+    box-sizing: border-box;
+}
+
+.chat-input-wrapper {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    background: #fff;
+    border-radius: 20px;
+    padding: 4px 8px;
+    min-height: 36px;
+}
+
+#chat-input {
+    flex: 1;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    outline: none;
+    resize: none;
+    max-height: 100px;
+    line-height: 1.4;
+}
+
+#chat-input::placeholder {
+    color: #b2b2b2;
+}
+
+.chat-action-btn {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: #7f8c8d;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.chat-action-btn:hover {
+    background: #e5e5e5;
+    color: #2ecc71;
+}
+
+.chat-action-btn.camera-btn {
+    color: #2ecc71;
+}
+
+.chat-action-btn.voice-btn {
+    color: #2ecc71;
+}
+
+.chat-action-btn.voice-btn.recording {
+    background: #e74c3c;
+    color: #fff;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.chat-action-btn.send-btn {
+    background: #2ecc71;
+    color: #fff;
+}
+
+.chat-action-btn.send-btn:hover {
+    background: #27ae60;
+}
+
+.chat-action-btn.send-btn:disabled {
+    background: #ddd;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+.voice-recording-indicator {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    padding: 20px 30px;
+    border-radius: 12px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.voice-recording-indicator.show {
+    display: block;
+}
+
+.voice-recording-indicator .mic-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.voice-recording-indicator .text {
+    font-size: 14px;
+}
+
+.voice-recording-indicator .volume-bars {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 10px;
+}
+
+.voice-recording-indicator .bar {
+    width: 4px;
+    height: 20px;
+    background: #2ecc71;
+    border-radius: 2px;
+    animation: soundwave 0.5s ease-in-out infinite alternate;
+}
+
+.voice-recording-indicator .bar:nth-child(1) { animation-delay: 0s; }
+.voice-recording-indicator .bar:nth-child(2) { animation-delay: 0.1s; }
+.voice-recording-indicator .bar:nth-child(3) { animation-delay: 0.2s; }
+.voice-recording-indicator .bar:nth-child(4) { animation-delay: 0.3s; }
+.voice-recording-indicator .bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes soundwave {
+    0% { height: 5px; }
+    100% { height: 25px; }
+}
+
+.image-preview {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    margin-top: 8px;
+}
+
+.recognizing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #7f8c8d;
+}
+
+.recognizing::after {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid #2ecc71;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 统计页日期选择 */
+.date-range-selector {
+    margin-bottom: 16px;
+}
+
+.date-range-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.date-range-inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.date-input-group {
+    flex: 1;
+}
+
+.date-input-group label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.date-input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+}
+
+.date-input-group input:focus {
+    border-color: #2ecc71;
+}
+
+.date-separator {
+    color: #7f8c8d;
+    padding-bottom: 10px;
+}
+
+.quick-date-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.quick-date-btn {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #7f8c8d;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-date-btn:hover {
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.quick-date-btn.active {
+    background: #2ecc71;
+    border-color: #2ecc71;
+    color: #fff;
+}
+
+.chart-container {
+    height: 280px;
+}
+
+#deficit-chart {
+    width: 100%;
+    height: 200px;
+}
+
+/* 数据汇总 */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.summary-item {
+    text-align: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.summary-item .label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.summary-item .value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2ecc71;
+}
+
+/* 历史记录 */
+#history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.history-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+.history-deficit {
+    font-weight: 600;
+    color: #2ecc71;
+}
+
+/* 我的页面 */
+.profile-form .form-group {
+    margin-bottom: 16px;
+}
+
+.profile-form label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.profile-form input,
+.profile-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.profile-form input:focus,
+.profile-form select:focus {
+    border-color: #2ecc71;
+}
+
+.profile-form small {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-top: 4px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+/* 性别选择 */
+.gender-select {
+    display: flex;
+    gap: 10px;
+}
+
+.gender-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gender-btn.active {
+    border-color: #2ecc71;
+    background: #e8f5e9;
+    color: #2ecc71;
+}
+
+.save-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2ecc71;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+
+.save-btn:hover {
+    background: #27ae60;
+}
+
+/* BMR结果 */
+.bmr-result {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.result-item {
+    padding: 8px;
+}
+
+.result-item .label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.result-item .value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #2ecc71;
+}
+
+/* 数据操作 */
+.data-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    border-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.action-btn.danger {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.action-btn.danger:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+/* 底部导航 */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 414px;
+    margin: 0 auto;
+    display: flex;
+    background: #fff;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0;
+    border: none;
+    background: none;
+    color: #95a5a6;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nav-item .icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.nav-item.active {
+    color: #2ecc71;
+}
+
+/* 响应式调整 */
+@media (max-width: 375px) {
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .quick-btn {
+        font-size: 12px;
+        padding: 10px 6px;
+    }
+
+    .summary-grid {
+        gap: 10px;
+    }
+
+    .summary-item .value {
+        font-size: 20px;
+    }
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 2px;
+}
+
+/* 成功/警告提示 */
+.toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    background: #333;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.toast.show {
+    opacity: 1;
+}
+
+.toast.success {
+    background: #2ecc71;
+}
+
+.toast.warning {
+    background: #f39c12;
+}
+
+/* 登录/注册遮罩页 */
+#auth-mask {
+    position: fixed;
+    inset: 0;
+    background: #f5f7f5;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+#auth-mask.hidden { display: none; }
+.auth-container { width: 100%; max-width: 360px; }
+.auth-logo { text-align: center; margin-bottom: 40px; }
+.auth-logo-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 700; color: #fff;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 20px rgba(46,204,113,0.35);
+}
+.auth-logo h1 { font-size: 24px; font-weight: 700; color: #2ecc71; margin-bottom: 6px; }
+.auth-logo p { font-size: 14px; color: #95a5a6; }
+.auth-form-group { margin-bottom: 16px; }
+.auth-form-group label { display: block; font-size: 13px; color: #7f8c8d; margin-bottom: 8px; }
+.phone-input-row {
+    display: flex; align-items: center;
+    background: #fff; border: 1px solid #ddd; border-radius: 10px;
+    overflow: hidden; transition: border-color 0.2s;
+}
+.phone-input-row:focus-within { border-color: #2ecc71; }
+.phone-prefix {
+    padding: 0 14px; font-size: 14px; color: #333; font-weight: 500;
+    border-right: 1px solid #eee; height: 48px; line-height: 48px; flex-shrink: 0;
+}
+.phone-input-row input {
+    flex: 1; border: none; outline: none;
+    padding: 0 14px; font-size: 15px; height: 48px; background: transparent;
+}
+.sms-input-row { display: flex; gap: 10px; }
+.sms-input-row input {
+    flex: 1; padding: 0 14px; height: 48px;
+    border: 1px solid #ddd; border-radius: 10px;
+    font-size: 15px; outline: none; transition: border-color 0.2s; letter-spacing: 4px;
+}
+.sms-input-row input:focus { border-color: #2ecc71; }
+.sms-btn {
+    flex-shrink: 0; padding: 0 14px; height: 48px;
+    background: #e8f5e9; color: #2ecc71;
+    border: none; border-radius: 10px;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.2s;
+}
+.sms-btn:disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
+.sms-tip { font-size: 12px; color: #95a5a6; margin-top: 6px; min-height: 18px; }
+.auth-submit-btn {
+    width: 100%; height: 50px;
+    background: #2ecc71; color: #fff;
+    border: none; border-radius: 12px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    margin-top: 8px; transition: background 0.2s, opacity 0.2s;
+    box-shadow: 0 4px 12px rgba(46,204,113,0.3);
+}
+.auth-submit-btn:hover { background: #27ae60; }
+.auth-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.auth-agreement { text-align: center; font-size: 12px; color: #95a5a6; margin-top: 20px; }
+.auth-agreement a { color: #2ecc71; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册页（遮罩层） -->
+    <div id="auth-mask">
+        <div class="auth-container">
+            <div class="auth-logo">
+                <div class="auth-logo-icon">瘦</div>
+                <h1>轻享瘦</h1>
+                <p>科学管理热量，轻松达成目标</p>
+            </div>
+            <div class="auth-step" id="auth-step-phone">
+                <div class="auth-form-group">
+                    <label>手机号</label>
+                    <div class="phone-input-row">
+                        <span class="phone-prefix">+86</span>
+                        <input type="tel" id="auth-phone" maxlength="11" placeholder="请输入手机号" />
+                    </div>
+                </div>
+                <div class="auth-form-group" id="sms-code-group" style="display:none;">
+                    <label>验证码</label>
+                    <div class="sms-input-row">
+                        <input type="number" id="auth-sms-code" maxlength="6" placeholder="请输入6位验证码" />
+                        <button class="sms-btn" id="sms-send-btn">获取验证码</button>
+                    </div>
+                    <p class="sms-tip" id="sms-tip"></p>
+                </div>
+                <button class="auth-submit-btn" id="auth-next-btn">获取验证码</button>
+                <p class="auth-agreement">登录即代表同意<a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app">
+        <!-- 首页 -->
+        <section id="page-home" class="page active">
+            <div class="header">
+                <h1>轻享瘦</h1>
+                <p class="subtitle">科学管理热量，轻松达成目标</p>
+            </div>
+
+            <div class="today-summary card">
+                <div class="card-title">今日概览</div>
+
+                <div class="deficit-display">
+                    <div class="deficit-circle">
+                        <svg viewBox="0 0 100 100">
+                            <circle class="bg" cx="50" cy="50" r="40"/>
+                            <circle class="exercise" cx="50" cy="50" r="40" id="exercise-progress"/>
+                            <circle class="intake" cx="50" cy="50" r="40" id="intake-progress"/>
+                            <circle class="intake-excess" cx="50" cy="50" r="40" id="intake-excess-progress"/>
+                            <g id="target-marker" class="target-marker" style="display:none">
+                                <rect x="48" y="3" width="4" height="13" rx="2"/>
+                            </g>
+                        </svg>
+                        <div class="deficit-value">
+                            <span class="deficit-num" id="today-deficit">0</span>
+                            <span class="deficit-sub"><span class="burn-val" id="circle-target-deficit">400</span> 大卡</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="circle-label">热量缺口</div>
+                <div class="circle-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot intake"></span>
+                        <span>摄入</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot exercise"></span>
+                        <span>消耗</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot excess"></span>
+                        <span>摄入超标</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot target"></span>
+                        <span>目标缺口</span>
+                    </div>
+                </div>
+
+                <div class="summary-stats">
+                    <div class="stat">
+                        <span class="label">摄入</span>
+                        <span class="value" id="today-intake">0</span>
+                        <small>大卡</small>
+                    </div>
+                    <div class="stat">
+                        <span class="label">消耗</span>
+                        <span class="value" id="today-exercise">0</span>
+                        <small>大卡</small>
+                    </div>
+                    <div class="stat">
+                        <span class="label">基础代谢</span>
+                        <span class="value" id="today-bmr">0</span>
+                        <small>大卡</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-message card" id="ai-message">
+                <div class="ai-avatar">AI</div>
+                <div class="ai-content">
+                    <p id="ai-text">开始记录你的一天吧！每一小步都是进步。</p>
+                </div>
+            </div>
+
+            <div class="quick-record card">
+                <div class="card-title">快速记录</div>
+                <div class="quick-buttons">
+                    <button class="quick-btn" data-action="breakfast">早餐</button>
+                    <button class="quick-btn" data-action="lunch">午餐</button>
+                    <button class="quick-btn" data-action="dinner">晚餐</button>
+                    <button class="quick-btn" data-action="exercise">运动</button>
+                </div>
+            </div>
+
+            <div class="today-records card">
+                <div class="card-title">今日记录</div>
+                <div id="today-records-list"></div>
+            </div>
+        </section>
+
+        <!-- 记录页 -->
+        <section id="page-record" class="page">
+            <div class="header">
+                <h1>记录</h1>
+            </div>
+
+            <div class="chat-container" id="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message ai">
+                        <div class="avatar">AI</div>
+                        <div class="content">
+                            <p>你好！告诉我你吃了什么或者做了什么运动，我来帮你记录~</p>
+                            <p class="hint">支持三种输入方式：</p>
+                            <p class="hint">文字输入 | 拍照识别 | 语音输入</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <button class="chat-action-btn camera-btn" id="camera-btn" title="拍照识别">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M12 15.2c1.8 0 3.2-1.4 3.2-3.2s-1.4-3.2-3.2-3.2-3.2 1.4-3.2 3.2 1.4 3.2 3.2 3.2zm9-8.6h-3.2l-1.8-2H8l-1.8 2H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-10c0-1.1-.9-2-2-2zm0 12H3v-10h4.1l1.8-2h6.2l1.8 2H21v10z"/>
+                    </svg>
+                </button>
+                <div class="chat-input-wrapper">
+                    <input type="text" id="chat-input" placeholder="输入食物或运动..." />
+                </div>
+                <button class="chat-action-btn voice-btn" id="voice-btn" title="语音输入">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/>
+                    </svg>
+                </button>
+                <button class="chat-action-btn send-btn" id="chat-send">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <input type="file" id="image-input" accept="image/*" capture="environment" style="display:none;" />
+            <div class="voice-recording-indicator" id="voice-indicator">
+                <div class="mic-icon">🎤</div>
+                <div class="text">正在录音...</div>
+                <div class="volume-bars">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 统计页 -->
+        <section id="page-stats" class="page">
+            <div class="header">
+                <h1>统计</h1>
+            </div>
+
+            <div class="date-range-selector card">
+                <div class="date-range-header">选择时间范围</div>
+                <div class="date-range-inputs">
+                    <div class="date-input-group">
+                        <label>开始日期</label>
+                        <input type="date" id="start-date" />
+                    </div>
+                    <span class="date-separator">至</span>
+                    <div class="date-input-group">
+                        <label>结束日期</label>
+                        <input type="date" id="end-date" />
+                    </div>
+                </div>
+                <div class="quick-date-btns">
+                    <button class="quick-date-btn active" data-days="7">最近7天</button>
+                    <button class="quick-date-btn" data-days="14">最近14天</button>
+                    <button class="quick-date-btn" data-days="30">最近30天</button>
+                </div>
+            </div>
+
+            <div class="chart-container card">
+                <div class="card-title">热量缺口趋势</div>
+                <canvas id="deficit-chart"></canvas>
+            </div>
+
+            <div class="stats-summary card">
+                <div class="card-title">数据汇总</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="label">平均缺口</span>
+                        <span class="value" id="avg-deficit">0</span>
+                        <small>大卡/天</small>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">达标天数</span>
+                        <span class="value" id="achieve-days">0</span>
+                        <small>天</small>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">总缺口</span>
+                        <span class="value" id="total-deficit">0</span>
+                        <small>大卡</small>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">预估减重</span>
+                        <span class="value" id="est-weight-loss">0</span>
+                        <small>kg</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="record-history card">
+                <div class="card-title">历史记录</div>
+                <div id="history-list"></div>
+            </div>
+        </section>
+
+        <!-- 我的页面 -->
+        <section id="page-profile" class="page">
+            <div class="header">
+                <h1>我的</h1>
+            </div>
+
+            <div class="card" style="display:flex;align-items:center;gap:14px;">
+                <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2ecc71,#27ae60);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0;">👤</div>
+                <div>
+                    <div style="font-size:15px;font-weight:600;color:#333;" id="profile-phone">未登录</div>
+                    <div style="font-size:12px;color:#95a5a6;margin-top:2px;">手机号登录</div>
+                </div>
+            </div>
+
+            <div class="profile-form card" id="profile-form">
+                <div class="card-title">个人信息</div>
+
+                <div class="form-group">
+                    <label>性别</label>
+                    <div class="gender-select">
+                        <button class="gender-btn active" data-gender="male">男</button>
+                        <button class="gender-btn" data-gender="female">女</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>身高 (cm)</label>
+                        <input type="number" id="height" placeholder="170" />
+                    </div>
+                    <div class="form-group">
+                        <label>体重 (kg)</label>
+                        <input type="number" id="weight" placeholder="70" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>年龄</label>
+                        <input type="number" id="age" placeholder="25" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>活动水平</label>
+                    <select id="activity-level">
+                        <option value="1.2">久坐（几乎不运动）</option>
+                        <option value="1.375">轻度活动（每周1-3天）</option>
+                        <option value="1.55" selected>中度活动（每周3-5天）</option>
+                        <option value="1.725">高度活动（每周6-7天）</option>
+                        <option value="1.9">非常高强度（体力劳动）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>目标缺口 (大卡/天)</label>
+                    <input type="number" id="target-deficit" placeholder="400" value="400" />
+                    <small>建议300-500大卡</small>
+                </div>
+
+                <button class="save-btn" id="save-profile">保存信息</button>
+            </div>
+
+            <div class="bmr-result card" id="bmr-result" style="display: none;">
+                <div class="result-item">
+                    <span class="label">基础代谢 (BMR)</span>
+                    <span class="value" id="bmr-value">0</span>
+                    <small>大卡</small>
+                </div>
+            </div>
+
+            <div class="data-actions card">
+                <button class="action-btn" id="export-data">导出数据</button>
+                <button class="action-btn danger" id="clear-data">清除数据</button>
+            </div>
+
+            <div class="card">
+                <button class="action-btn danger" id="logout-btn" style="width:100%;">退出登录</button>
+            </div>
+        </section>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <span class="icon">🏠</span>
+                <span class="label">首页</span>
+            </button>
+            <button class="nav-item" data-page="record">
+                <span class="icon">📝</span>
+                <span class="label">记录</span>
+            </button>
+            <button class="nav-item" data-page="stats">
+                <span class="icon">📊</span>
+                <span class="label">统计</span>
+            </button>
+            <button class="nav-item" data-page="profile">
+                <span class="icon">👤</span>
+                <span class="label">我的</span>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+/**
+ * 数据存储模块
+ */
+const Storage = {
+    KEYS: {
+        USER: 'fat_user',
+        RECORDS: 'fat_records'
+    },
+    getUser() {
+        try {
+            const data = localStorage.getItem(this.KEYS.USER);
+            return data ? JSON.parse(data) : null;
+        } catch (e) { return null; }
+    },
+    saveUser(user) {
+        try { localStorage.setItem(this.KEYS.USER, JSON.stringify(user)); return true; }
+        catch (e) { return false; }
+    },
+    getRecords() {
+        try {
+            const data = localStorage.getItem(this.KEYS.RECORDS);
+            return data ? JSON.parse(data) : {};
+        } catch (e) { return {}; }
+    },
+    getRecord(date) {
+        const records = this.getRecords();
+        return records[date] || { intake: [], exercise: [], totalIntake: 0, totalExercise: 0, deficit: 0 };
+    },
+    saveRecord(date, record) {
+        try {
+            const records = this.getRecords();
+            records[date] = record;
+            localStorage.setItem(this.KEYS.RECORDS, JSON.stringify(records));
+            return true;
+        } catch (e) { return false; }
+    },
+    addIntake(date, item) {
+        const record = this.getRecord(date);
+        record.intake = record.intake || [];
+        record.intake.push(item);
+        record.totalIntake = (record.totalIntake || 0) + item.calories;
+        this.saveRecord(date, record);
+        return record;
+    },
+    addExercise(date, item) {
+        const record = this.getRecord(date);
+        record.exercise = record.exercise || [];
+        record.exercise.push(item);
+        record.totalExercise = (record.totalExercise || 0) + item.calories;
+        this.saveRecord(date, record);
+        return record;
+    },
+    updateDeficit(date, tdee) {
+        const record = this.getRecord(date);
+        record.totalIntake = record.totalIntake || 0;
+        record.totalExercise = record.totalExercise || 0;
+        record.deficit = tdee + record.totalExercise - record.totalIntake;
+        this.saveRecord(date, record);
+        return record;
+    },
+    getRecordsByDays(days) {
+        const records = this.getRecords();
+        const result = [];
+        const today = new Date();
+        for (let i = days - 1; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(date.getDate() - i);
+            const dateStr = this.formatDate(date);
+            result.push({ date: dateStr, ...this.getRecord(dateStr) });
+        }
+        return result;
+    },
+    formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    },
+    getToday() { return this.formatDate(new Date()); },
+    clearAll() {
+        localStorage.removeItem(this.KEYS.USER);
+        localStorage.removeItem(this.KEYS.RECORDS);
+    },
+    exportData() {
+        const data = { user: this.getUser(), records: this.getRecords(), exportTime: new Date().toISOString() };
+        return JSON.stringify(data, null, 2);
+    }
+};
+window.Storage = Storage;
+
+/**
+ * 热量计算模块
+ */
+const Calculator = {
+    calculateBMR(weight, height, age, gender) {
+        let bmr = 10 * weight + 6.25 * height - 5 * age;
+        if (gender === 'male') bmr += 5;
+        else bmr -= 161;
+        return Math.round(bmr);
+    },
+    calculateTDEE(bmr, activityLevel) { return Math.round(bmr * activityLevel); },
+    calculateDeficit(tdee, exerciseCalories, intakeCalories) { return tdee + exerciseCalories - intakeCalories; },
+    calculateTargetIntake(tdee, targetDeficit) { return tdee - targetDeficit; },
+    estimateWeightLoss(totalDeficit) { return (totalDeficit / 7700).toFixed(1); },
+    calculateUserData(user) {
+        const bmr = this.calculateBMR(user.weight, user.height, user.age, user.gender);
+        const tdee = this.calculateTDEE(bmr, user.activityLevel);
+        const targetIntake = this.calculateTargetIntake(tdee, user.targetDeficit);
+        return { bmr, tdee, targetIntake, targetDeficit: user.targetDeficit };
+    },
+    getDeficitProgress(deficit, target) {
+        if (target <= 0) return 0;
+        return Math.min((deficit / target) * 100, 150);
+    }
+};
+window.Calculator = Calculator;
+
+/**
+ * 输入解析模块
+ */
+const Parser = {
+    foodDatabase: {
+        '米饭': { calories: 115, unit: '100g', defaultAmount: 200 },
+        '面条': { calories: 110, unit: '100g', defaultAmount: 200 },
+        '馒头': { calories: 221, unit: '个', defaultAmount: 1 },
+        '面包': { calories: 265, unit: '片', defaultAmount: 1 },
+        '粥': { calories: 50, unit: '碗', defaultAmount: 1 },
+        '饺子': { calories: 80, unit: '个', defaultAmount: 10 },
+        '包子': { calories: 200, unit: '个', defaultAmount: 1 },
+        '鸡胸肉': { calories: 165, unit: '100g', defaultAmount: 100 },
+        '鸡腿': { calories: 180, unit: '个', defaultAmount: 1 },
+        '牛肉': { calories: 125, unit: '100g', defaultAmount: 100 },
+        '猪肉': { calories: 143, unit: '100g', defaultAmount: 100 },
+        '羊肉': { calories: 203, unit: '100g', defaultAmount: 100 },
+        '鱼肉': { calories: 120, unit: '100g', defaultAmount: 100 },
+        '虾': { calories: 99, unit: '100g', defaultAmount: 100 },
+        '鸡蛋': { calories: 75, unit: '个', defaultAmount: 1 },
+        '青菜': { calories: 20, unit: '份', defaultAmount: 1 },
+        '白菜': { calories: 18, unit: '份', defaultAmount: 1 },
+        '西红柿': { calories: 25, unit: '个', defaultAmount: 1 },
+        '黄瓜': { calories: 16, unit: '根', defaultAmount: 1 },
+        '土豆': { calories: 77, unit: '个', defaultAmount: 1 },
+        '茄子': { calories: 25, unit: '份', defaultAmount: 1 },
+        '苹果': { calories: 95, unit: '个', defaultAmount: 1 },
+        '香蕉': { calories: 89, unit: '根', defaultAmount: 1 },
+        '橙子': { calories: 62, unit: '个', defaultAmount: 1 },
+        '西瓜': { calories: 31, unit: '份', defaultAmount: 1 },
+        '葡萄': { calories: 69, unit: '份', defaultAmount: 1 },
+        '草莓': { calories: 33, unit: '份', defaultAmount: 1 },
+        '牛奶': { calories: 65, unit: '杯', defaultAmount: 1 },
+        '酸奶': { calories: 100, unit: '盒', defaultAmount: 1 },
+        '豆浆': { calories: 45, unit: '杯', defaultAmount: 1 },
+        '可乐': { calories: 43, unit: '100ml', defaultAmount: 330 },
+        '奶茶': { calories: 150, unit: '杯', defaultAmount: 1 },
+        '咖啡': { calories: 5, unit: '杯', defaultAmount: 1 },
+        '薯片': { calories: 536, unit: '100g', defaultAmount: 50 },
+        '巧克力': { calories: 546, unit: '块', defaultAmount: 1 },
+        '饼干': { calories: 100, unit: '片', defaultAmount: 3 },
+        '蛋糕': { calories: 350, unit: '块', defaultAmount: 1 },
+        '冰淇淋': { calories: 200, unit: '份', defaultAmount: 1 },
+        '汉堡': { calories: 500, unit: '个', defaultAmount: 1 },
+        '披萨': { calories: 266, unit: '片', defaultAmount: 1 },
+        '炸鸡': { calories: 320, unit: '块', defaultAmount: 1 },
+        '薯条': { calories: 320, unit: '份', defaultAmount: 1 },
+        '早餐': { calories: 400, unit: '份', defaultAmount: 1, isMeal: true },
+        '午餐': { calories: 600, unit: '份', defaultAmount: 1, isMeal: true },
+        '晚餐': { calories: 500, unit: '份', defaultAmount: 1, isMeal: true },
+        '宵夜': { calories: 300, unit: '份', defaultAmount: 1, isMeal: true }
+    },
+    exerciseDatabase: {
+        '步行': { calories: 0.03, unit: '步', type: 'per_unit' },
+        '走路': { calories: 0.03, unit: '步', type: 'per_unit' },
+        '跑步': { calories: 10, unit: '分钟', type: 'per_minute' },
+        '慢跑': { calories: 8, unit: '分钟', type: 'per_minute' },
+        '快跑': { calories: 12, unit: '分钟', type: 'per_minute' },
+        '骑行': { calories: 7, unit: '分钟', type: 'per_minute' },
+        '骑车': { calories: 7, unit: '分钟', type: 'per_minute' },
+        '游泳': { calories: 12, unit: '分钟', type: 'per_minute' },
+        '跳绳': { calories: 10, unit: '分钟', type: 'per_minute' },
+        '瑜伽': { calories: 4, unit: '分钟', type: 'per_minute' },
+        '健身': { calories: 6, unit: '分钟', type: 'per_minute' },
+        '举铁': { calories: 5, unit: '分钟', type: 'per_minute' },
+        '深蹲': { calories: 8, unit: '分钟', type: 'per_minute' },
+        '俯卧撑': { calories: 7, unit: '分钟', type: 'per_minute' },
+        '仰卧起坐': { calories: 6, unit: '分钟', type: 'per_minute' },
+        '平板支撑': { calories: 5, unit: '分钟', type: 'per_minute' },
+        '爬山': { calories: 8, unit: '分钟', type: 'per_minute' },
+        '羽毛球': { calories: 6, unit: '分钟', type: 'per_minute' },
+        '乒乓球': { calories: 4, unit: '分钟', type: 'per_minute' },
+        '篮球': { calories: 8, unit: '分钟', type: 'per_minute' },
+        '足球': { calories: 10, unit: '分钟', type: 'per_minute' },
+        '跳舞': { calories: 5, unit: '分钟', type: 'per_minute' }
+    },
+    exerciseKeywords: ['运动', '跑了', '游了', '骑了', '跳了', '做了', '走了', '步', '分钟跑步', '分钟游泳', '分钟骑行'],
+    parse(input) {
+        input = input.trim().toLowerCase();
+        if (this.isExercise(input)) return this.parseExercise(input);
+        return this.parseFood(input);
+    },
+    isExercise(input) {
+        for (const keyword of this.exerciseKeywords) {
+            if (input.includes(keyword)) return true;
+        }
+        for (const activity in this.exerciseDatabase) {
+            if (input.includes(activity)) return true;
+        }
+        return false;
+    },
+    parseFood(input) {
+        let matchedFood = null;
+        let foodName = '';
+        for (const food in this.foodDatabase) {
+            if (input.includes(food)) {
+                matchedFood = this.foodDatabase[food];
+                foodName = food;
+                break;
+            }
+        }
+        if (!matchedFood) {
+            return { type: 'food', item: input, calories: 200, unit: '份', isEstimated: true };
+        }
+        const amount = this.extractAmount(input, foodName);
+        let calories;
+        if (matchedFood.isMeal) {
+            calories = matchedFood.calories;
+        } else if (matchedFood.unit.includes('100g') || matchedFood.unit.includes('100ml')) {
+            calories = Math.round((matchedFood.calories * amount) / 100);
+        } else {
+            calories = Math.round(matchedFood.calories * amount);
+        }
+        return {
+            type: 'food',
+            item: foodName,
+            calories: Math.max(calories, 10),
+            unit: matchedFood.unit,
+            amount: amount,
+            displayText: `${foodName} ${amount > 1 ? amount : ''}${matchedFood.unit}`
+        };
+    },
+    parseExercise(input) {
+        let matchedActivity = null;
+        let activityName = '';
+        for (const activity in this.exerciseDatabase) {
+            if (input.includes(activity)) {
+                matchedActivity = this.exerciseDatabase[activity];
+                activityName = activity;
+                break;
+            }
+        }
+        if (!matchedActivity) {
+            return { type: 'exercise', item: input, calories: 100, unit: '次', isEstimated: true };
+        }
+        const amount = this.extractExerciseAmount(input, activityName);
+        let calories = Math.round(matchedActivity.calories * amount);
+        return {
+            type: 'exercise',
+            item: activityName,
+            calories: Math.max(calories, 10),
+            unit: matchedActivity.unit,
+            amount: amount,
+            displayText: `${activityName} ${amount}${matchedActivity.unit}`
+        };
+    },
+    extractAmount(input, itemName) {
+        const patterns = [
+            /(\d+)\s*g/i, /(\d+)\s*克/i, /(\d+)\s*ml/i, /(\d+)\s*毫升/i,
+            /(\d+)\s*个/i, /(\d+)\s*块/i, /(\d+)\s*片/i, /(\d+)\s*根/i,
+            /(\d+)\s*碗/i, /(\d+)\s*杯/i, /(\d+)\s*份/i,
+            /吃了[一]?个/, /一个$/, /(\d+)/
+        ];
+        for (const pattern of patterns) {
+            const match = input.match(pattern);
+            if (match) {
+                if (pattern.source.includes('一') || pattern.source.includes('个$')) return 1;
+                return parseInt(match[1]) || 1;
+            }
+        }
+        const food = this.foodDatabase[itemName];
+        return food ? food.defaultAmount : 1;
+    },
+    extractExerciseAmount(input, activityName) {
+        const match = input.match(/(\d+)/);
+        if (match) return parseInt(match[1]);
+        const chineseNumbers = { '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+        for (const [chinese, num] of Object.entries(chineseNumbers)) {
+            if (input.includes(chinese)) return num;
+        }
+        if (activityName === '步行' || activityName === '走路') return 10000;
+        return 30;
+    }
+};
+window.Parser = Parser;
+
+/**
+ * AI鼓励话术模块
+ */
+const Encourager = {
+    overTargetMessages: [
+        "今天的摄入稍高了一点，不过没关系，明天可以多运动一下平衡回来~",
+        "偶尔放纵一下也是可以的，重要的是保持长期的好习惯。",
+        "别灰心，减肥是一个长期的过程，今天超标不代表失败。",
+        "记得多喝水，帮助代谢。明天继续加油！",
+        "今天的热量超标了一点，但不要自责，重要的是坚持。",
+        "每个人都会有这样的时候，关键是不要放弃。",
+        "想想你已经取得的进步，这只是一个小小的波折。",
+        "明天是个新的开始，好好规划一下餐食吧~"
+    ],
+    onTargetMessages: [
+        "太棒了！今天的热量缺口刚刚好，继续保持！",
+        "做得很好！你正在朝着目标稳步前进~",
+        "完美！今天的努力会在未来的体重秤上体现出来的。",
+        "你真厉害！保持这样的节奏，目标就在眼前。",
+        "今天的自律让你离理想体重更近了一步！",
+        "优秀！你对自己的承诺正在兑现。",
+        "今天的表现非常出色，值得给自己点个赞！",
+        "坚持得很好，你正在建立健康的习惯。"
+    ],
+    exceedTargetMessages: [
+        "哇！今天的缺口超额完成，太厉害了！",
+        "今天的你简直是减肥达人！超额完成任务~",
+        "厉害了！今天的热量缺口远超目标，继续保持这个势头！",
+        "太优秀了！不过也要注意不要过度节食哦~",
+        "今天的状态超赞！但记得保证营养均衡。",
+        "超额完成目标！你的自律让人佩服。",
+        "今天的努力会让体重秤给你惊喜的！"
+    ],
+    streakMessages: [
+        "已经连续{days}天达标了！你的坚持令人敬佩！",
+        "{days}天的连续努力，你正在创造奇迹！",
+        "连续{days}天！这种自律会成功的！",
+        "太厉害了！{days}天的坚持不是每个人都能做到的！",
+        "{days}天的旅程，每一步都是进步！",
+        "连续{days}天达标，你已经超越了大多数人！"
+    ],
+    welcomeMessages: [
+        "欢迎来到轻享瘦！开始记录你的一天吧，每一小步都是进步。",
+        "你好！让我们一起开启健康减肥之旅，首先记得完善个人信息哦~",
+        "准备好了吗？让我们用科学的方法，轻松达成目标！"
+    ],
+    emptyStomachMessages: [
+        "今天还没开始记录呢，快告诉我你吃了什么~",
+        "等待你的第一条记录！哪怕是喝杯水也可以记录哦~",
+        "今天的第一口美食是什么？快来记录吧！"
+    ],
+    generateMessage(data, user, streakDays = 0) {
+        const targetDeficit = user.targetDeficit || 400;
+        const deficit = data.deficit || 0;
+        if (!data.intake || data.intake.length === 0) {
+            if (streakDays === 0) return this.getRandomItem(this.welcomeMessages);
+            return this.getRandomItem(this.emptyStomachMessages);
+        }
+        let message;
+        let streakBonus = '';
+        if (streakDays >= 2 && deficit >= targetDeficit * 0.8) {
+            streakBonus = ' ' + this.getRandomItem(this.streakMessages).replace('{days}', streakDays);
+        }
+        if (deficit < targetDeficit * 0.5) {
+            message = this.getRandomItem(this.overTargetMessages);
+        } else if (deficit >= targetDeficit * 0.8 && deficit <= targetDeficit * 1.2) {
+            message = this.getRandomItem(this.onTargetMessages);
+        } else if (deficit > targetDeficit * 1.2) {
+            message = this.getRandomItem(this.exceedTargetMessages);
+        } else {
+            message = "差一点点就达标了，加油！你可以的~";
+        }
+        return message + streakBonus;
+    },
+    generateRecordFeedback(record, currentData, user) {
+        const targetDeficit = user.targetDeficit || 400;
+        const tdee = user.tdee || 2000;
+        const remaining = tdee + currentData.totalExercise - currentData.totalIntake - targetDeficit;
+        let feedback = '';
+        if (record.type === 'food') {
+            feedback = `已记录：${record.displayText || record.item}，约${record.calories}大卡。`;
+            if (remaining > 0) {
+                feedback += ` 今日还可以摄入约${remaining}大卡。`;
+            } else {
+                feedback += ` 今日摄入已达到建议上限，可以适当运动增加消耗~`;
+            }
+        } else if (record.type === 'exercise') {
+            feedback = `已记录：${record.displayText || record.item}，消耗约${record.calories}大卡。`;
+            feedback += ` 继续加油！运动是最好的脂肪燃烧方式~`;
+        }
+        return feedback;
+    },
+    getRandomItem(array) { return array[Math.floor(Math.random() * array.length)]; }
+};
+window.Encourager = Encourager;
+
+/**
+ * 主应用模块
+ */
+const Auth = (() => {
+    const TOKEN_KEY = 'fat_token';
+    const PHONE_KEY = 'fat_phone';
+    let countdownTimer = null;
+    let pendingPhone = '';
+    let mockCode = '';
+    function isLoggedIn() { return !!localStorage.getItem(TOKEN_KEY); }
+    function getPhone() { return localStorage.getItem(PHONE_KEY) || ''; }
+    function saveSession(phone, token) {
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(PHONE_KEY, phone);
+    }
+    function clearSession() {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(PHONE_KEY);
+    }
+    function sendSms(phone) {
+        // TODO: 替换为 POST /api/auth/send-sms { phone }
+        mockCode = String(Math.floor(100000 + Math.random() * 900000));
+        console.log(`[原型模式] 手机 ${phone} 的验证码：${mockCode}`);
+        return Promise.resolve({ success: true });
+    }
+    function verifyCode(phone, code) {
+        // TODO: 替换为 POST /api/auth/verify { phone, code } → { token }
+        if (code === mockCode) {
+            return Promise.resolve({ success: true, token: 'mock_token_' + Date.now() });
+        }
+        return Promise.resolve({ success: false, message: '验证码错误' });
+    }
+    function startCountdown(btn, seconds = 60) {
+        let remaining = seconds;
+        btn.disabled = true;
+        btn.textContent = `${remaining}s 后重发`;
+        countdownTimer = setInterval(() => {
+            remaining -= 1;
+            if (remaining <= 0) {
+                clearInterval(countdownTimer);
+                btn.disabled = false;
+                btn.textContent = '重新获取';
+            } else {
+                btn.textContent = `${remaining}s 后重发`;
+            }
+        }, 1000);
+    }
+    function showMask() { document.getElementById('auth-mask').classList.remove('hidden'); }
+    function hideMask() { document.getElementById('auth-mask').classList.add('hidden'); }
+    function showTip(el, msg, type) {
+        el.textContent = msg;
+        el.style.color = type === 'error' ? '#e74c3c' : '#7f8c8d';
+    }
+    function bindEvents() {
+        const phoneInput   = document.getElementById('auth-phone');
+        const smsCodeGroup = document.getElementById('sms-code-group');
+        const smsCodeInput = document.getElementById('auth-sms-code');
+        const sendBtn      = document.getElementById('sms-send-btn');
+        const nextBtn      = document.getElementById('auth-next-btn');
+        const smsTip       = document.getElementById('sms-tip');
+        phoneInput.addEventListener('input', () => {
+            phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+        });
+        smsCodeInput.addEventListener('input', () => {
+            smsCodeInput.value = smsCodeInput.value.replace(/\D/g, '').slice(0, 6);
+        });
+        nextBtn.addEventListener('click', async () => {
+            const phone = phoneInput.value.trim();
+            if (smsCodeGroup.style.display === 'none') {
+                if (!/^1[3-9]\d{9}$/.test(phone)) {
+                    showTip(smsTip, '请输入正确的11位手机号', 'error'); return;
+                }
+                nextBtn.disabled = true;
+                nextBtn.textContent = '发送中…';
+                await sendSms(phone);
+                pendingPhone = phone;
+                smsCodeGroup.style.display = 'block';
+                nextBtn.textContent = '登录 / 注册';
+                nextBtn.disabled = false;
+                startCountdown(sendBtn);
+                showTip(smsTip, `验证码已发送至 ${phone.slice(0,3)}****${phone.slice(7)}`, 'info');
+            } else {
+                const code = smsCodeInput.value.trim();
+                if (code.length !== 6) {
+                    showTip(smsTip, '请输入6位验证码', 'error'); return;
+                }
+                nextBtn.disabled = true;
+                nextBtn.textContent = '验证中…';
+                const result = await verifyCode(pendingPhone, code);
+                if (result.success) {
+                    saveSession(pendingPhone, result.token);
+                    hideMask();
+                    if (window.App && typeof window.App.onLogin === 'function') {
+                        window.App.onLogin();
+                    }
+                } else {
+                    showTip(smsTip, result.message || '验证失败，请重试', 'error');
+                    nextBtn.disabled = false;
+                    nextBtn.textContent = '登录 / 注册';
+                }
+            }
+        });
+        sendBtn.addEventListener('click', async () => {
+            const phone = phoneInput.value.trim();
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                showTip(smsTip, '请输入正确的手机号', 'error'); return;
+            }
+            sendBtn.disabled = true;
+            await sendSms(phone);
+            pendingPhone = phone;
+            startCountdown(sendBtn);
+            showTip(smsTip, '验证码已重新发送', 'info');
+        });
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (!confirm('确定要退出登录吗？')) return;
+                clearSession();
+                phoneInput.value = '';
+                smsCodeInput.value = '';
+                smsCodeGroup.style.display = 'none';
+                nextBtn.textContent = '获取验证码';
+                nextBtn.disabled = false;
+                smsTip.textContent = '';
+                if (countdownTimer) clearInterval(countdownTimer);
+                sendBtn.disabled = false;
+                sendBtn.textContent = '获取验证码';
+                showMask();
+            });
+        }
+    }
+    function init() {
+        bindEvents();
+        if (isLoggedIn()) { hideMask(); return; }
+        showMask();
+    }
+    return { init, isLoggedIn, getPhone, clearSession };
+})();
+
+const App = {
+    state: {
+        currentPage: 'home',
+        user: null,
+        todayRecord: null,
+        streakDays: 0,
+        startDate: null,
+        endDate: null
+    },
+    init() {
+        this.state.user = Storage.getUser();
+        this.loadTodayRecord();
+        this.initNavigation();
+        this.initProfilePage();
+        this.initChatPage();
+        this.initQuickButtons();
+        this.initStatsPage();
+        this.updateHomePage();
+        this.updatePhoneDisplay();
+        if (!this.state.user) {
+            this.showToast('请先完善个人信息', 'warning');
+        }
+    },
+    onLogin() {
+        this.init();
+    },
+    updatePhoneDisplay() {
+        const el = document.getElementById('profile-phone');
+        if (!el) return;
+        const phone = window.Auth ? Auth.getPhone() : '';
+        if (phone) {
+            el.textContent = phone.slice(0, 3) + '****' + phone.slice(7);
+        }
+    },
+    loadTodayRecord() {
+        const today = Storage.getToday();
+        this.state.todayRecord = Storage.getRecord(today);
+    },
+    initNavigation() {
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const pageName = item.dataset.page;
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(`page-${pageName}`).classList.add('active');
+                this.state.currentPage = pageName;
+                if (pageName === 'home') this.updateHomePage();
+                else if (pageName === 'stats') this.updateStatsPage();
+                else if (pageName === 'profile') this.updateProfilePage();
+            });
+        });
+    },
+    initProfilePage() {
+        const genderBtns = document.querySelectorAll('.gender-btn');
+        genderBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                genderBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+        document.getElementById('save-profile').addEventListener('click', () => { this.saveProfile(); });
+        document.getElementById('export-data').addEventListener('click', () => { this.exportData(); });
+        document.getElementById('clear-data').addEventListener('click', () => {
+            if (confirm('确定要清除所有数据吗？此操作不可恢复！')) {
+                Storage.clearAll();
+                this.state.user = null;
+                this.state.todayRecord = null;
+                this.showToast('数据已清除');
+                location.reload();
+            }
+        });
+    },
+    saveProfile() {
+        const gender = document.querySelector('.gender-btn.active').dataset.gender;
+        const height = parseInt(document.getElementById('height').value);
+        const weight = parseInt(document.getElementById('weight').value);
+        const age = parseInt(document.getElementById('age').value);
+        const activityLevel = parseFloat(document.getElementById('activity-level').value);
+        const targetDeficit = parseInt(document.getElementById('target-deficit').value);
+        if (!height || !weight || !age) { this.showToast('请填写完整信息', 'warning'); return; }
+        if (height < 100 || height > 250) { this.showToast('身高数据异常', 'warning'); return; }
+        if (weight < 30 || weight > 300) { this.showToast('体重数据异常', 'warning'); return; }
+        if (age < 10 || age > 120) { this.showToast('年龄数据异常', 'warning'); return; }
+        const user = { gender, height, weight, age, activityLevel, targetDeficit: targetDeficit || 400 };
+        const calcResult = Calculator.calculateUserData(user);
+        user.bmr = calcResult.bmr;
+        user.tdee = calcResult.tdee;
+        Storage.saveUser(user);
+        this.state.user = user;
+        this.showBMRResult(calcResult);
+        this.showToast('保存成功', 'success');
+        this.updateHomePage();
+    },
+    showBMRResult(result) {
+        const bmrResult = document.getElementById('bmr-result');
+        bmrResult.style.display = 'flex';
+        document.getElementById('bmr-value').textContent = result.bmr;
+        document.getElementById('tdee-value').textContent = result.tdee;
+        document.getElementById('target-intake').textContent = result.targetIntake;
+    },
+    updateProfilePage() {
+        const user = this.state.user;
+        if (!user) return;
+        document.querySelector(`.gender-btn[data-gender="${user.gender}"]`).click();
+        document.getElementById('height').value = user.height;
+        document.getElementById('weight').value = user.weight;
+        document.getElementById('age').value = user.age;
+        document.getElementById('activity-level').value = user.activityLevel;
+        document.getElementById('target-deficit').value = user.targetDeficit;
+        this.showBMRResult({
+            bmr: user.bmr,
+            tdee: user.tdee,
+            targetIntake: Calculator.calculateTargetIntake(user.tdee, user.targetDeficit)
+        });
+    },
+    initChatPage() {
+        const input = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('chat-send');
+        const cameraBtn = document.getElementById('camera-btn');
+        const imageInput = document.getElementById('image-input');
+        const voiceBtn = document.getElementById('voice-btn');
+        const voiceIndicator = document.getElementById('voice-indicator');
+        sendBtn.addEventListener('click', () => { this.sendMessage(); });
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendMessage(); });
+        cameraBtn.addEventListener('click', () => { imageInput.click(); });
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                this.handleImageUpload(file);
+            }
+            imageInput.value = '';
+        });
+        this.initVoiceRecognition(voiceBtn, voiceIndicator, input);
+    },
+    initVoiceRecognition(voiceBtn, voiceIndicator, input) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            voiceBtn.style.display = 'none';
+            return;
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'zh-CN';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        let isRecording = false;
+        voiceBtn.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                return;
+            }
+            try {
+                recognition.start();
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                voiceIndicator.classList.add('show');
+            } catch (e) {
+                console.error('语音识别启动失败:', e);
+                this.showToast('语音识别启动失败', 'warning');
+            }
+        });
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            input.value = transcript;
+        };
+        recognition.onend = () => {
+            isRecording = false;
+            voiceBtn.classList.remove('recording');
+            voiceIndicator.classList.remove('show');
+        };
+        recognition.onerror = (event) => {
+            isRecording = false;
+            voiceBtn.classList.remove('recording');
+            voiceIndicator.classList.remove('show');
+            let errorMsg = '语音识别失败';
+            if (event.error === 'not-allowed') {
+                errorMsg = '请允许麦克风权限';
+            } else if (event.error === 'no-speech') {
+                errorMsg = '未检测到语音';
+            } else if (event.error === 'network') {
+                errorMsg = '网络错误，请重试';
+            }
+            this.showToast(errorMsg, 'warning');
+        };
+    },
+    handleImageUpload(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const imageData = e.target.result;
+            this.addChatMessage('user', `<img src="${imageData}" class="image-preview" alt="食物图片">`, true);
+            this.recognizeImage(imageData);
+        };
+        reader.readAsDataURL(file);
+    },
+    recognizeImage(imageData) {
+        this.addChatMessage('ai', '<span class="recognizing">正在识别食物...</span>', true);
+        if (!this.state.user) {
+            setTimeout(() => {
+                const container = document.getElementById('chat-messages');
+                const lastMsg = container.lastElementChild;
+                if (lastMsg) {
+                    const content = lastMsg.querySelector('.content');
+                    if (content && content.innerHTML.includes('recognizing')) {
+                        content.innerHTML = '请先在"我的"页面完善个人信息，这样我才能帮你计算热量~';
+                    }
+                }
+            }, 1000);
+            return;
+        }
+        const foods = Object.keys(Parser.foodDatabase);
+        const randomFood = foods[Math.floor(Math.random() * foods.length)];
+        const foodInfo = Parser.foodDatabase[randomFood];
+        const recognized = {
+            type: 'food',
+            item: randomFood,
+            calories: foodInfo.calories,
+            unit: foodInfo.unit,
+            displayText: `${randomFood} (拍照识别)`
+        };
+        setTimeout(() => {
+            const container = document.getElementById('chat-messages');
+            const lastMsg = container.lastElementChild;
+            if (lastMsg) {
+                const content = lastMsg.querySelector('.content');
+                if (content && content.innerHTML.includes('recognizing')) {
+                    content.innerHTML = `识别结果：<strong>${randomFood}</strong>，约 ${foodInfo.calories} 大卡/${foodInfo.unit}<br><small style="color:#7f8c8d">已自动记录（AI识别为演示功能）</small>`;
+                }
+            }
+            const today = Storage.getToday();
+            const record = {
+                food: recognized.item,
+                calories: recognized.calories,
+                time: new Date().toLocaleTimeString(),
+                displayText: recognized.displayText
+            };
+            Storage.addIntake(today, record);
+            this.state.todayRecord = Storage.updateDeficit(today, this.state.user.tdee);
+            this.updateHomePage();
+        }, 1500);
+    },
+    sendMessage() {
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+        this.addChatMessage('user', text);
+        input.value = '';
+        const result = Parser.parse(text);
+        if (!this.state.user) {
+            this.addChatMessage('ai', '请先在"我的"页面完善个人信息，这样我才能帮你计算热量~');
+            return;
+        }
+        const today = Storage.getToday();
+        let record;
+        if (result.type === 'food') {
+            record = { food: result.item, calories: result.calories, time: new Date().toLocaleTimeString(), displayText: result.displayText };
+            Storage.addIntake(today, record);
+        } else {
+            record = { activity: result.item, calories: result.calories, time: new Date().toLocaleTimeString(), displayText: result.displayText };
+            Storage.addExercise(today, record);
+        }
+        this.state.todayRecord = Storage.updateDeficit(today, this.state.user.tdee);
+        const feedback = Encourager.generateRecordFeedback(result, this.state.todayRecord, this.state.user);
+        this.addChatMessage('ai', feedback);
+        this.updateHomePage();
+    },
+    addChatMessage(type, text, isHtml = false) {
+        const container = document.getElementById('chat-messages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        const content = isHtml ? text : `<p>${text}</p>`;
+        messageDiv.innerHTML = `<div class="avatar">${type === 'ai' ? 'AI' : '我'}</div><div class="content">${content}</div>`;
+        container.appendChild(messageDiv);
+        container.scrollTop = container.scrollHeight;
+    },
+    initQuickButtons() {
+        const buttons = document.querySelectorAll('.quick-btn');
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                if (!this.state.user) { this.showToast('请先完善个人信息', 'warning'); return; }
+                document.querySelector('.nav-item[data-page="record"]').click();
+                const input = document.getElementById('chat-input');
+                switch (action) {
+                    case 'breakfast': input.value = '早餐'; break;
+                    case 'lunch': input.value = '午餐'; break;
+                    case 'dinner': input.value = '晚餐'; break;
+                    case 'exercise': input.value = '步行10000步'; break;
+                }
+                input.focus();
+            });
+        });
+    },
+    updateHomePage() {
+        if (!this.state.user) {
+            document.getElementById('today-deficit').textContent = '0';
+            document.getElementById('today-intake').textContent = '0';
+            document.getElementById('today-exercise').textContent = '0';
+            document.getElementById('today-bmr').textContent = '0';
+            document.getElementById('ai-text').textContent = Encourager.getRandomItem(Encourager.welcomeMessages);
+            this.updateTodayRecordsList({ intake: [], exercise: [] });
+            this.updateDeficitCircle(0, 0, 0, 400);
+            return;
+        }
+        this.loadTodayRecord();
+        const record = this.state.todayRecord;
+        const user = this.state.user;
+        const deficit = user.bmr + (record.totalExercise || 0) - (record.totalIntake || 0);
+        document.getElementById('today-deficit').textContent = deficit;
+        document.getElementById('today-intake').textContent = record.totalIntake || 0;
+        document.getElementById('today-exercise').textContent = record.totalExercise || 0;
+        document.getElementById('today-bmr').textContent = user.bmr;
+        this.updateDeficitCircle(record.totalIntake || 0, record.totalExercise || 0, user.bmr, user.targetDeficit);
+
+        this.state.streakDays = this.calculateStreakDays();
+        const message = Encourager.generateMessage(record, user, this.state.streakDays);
+        document.getElementById('ai-text').textContent = message;
+        this.updateTodayRecordsList(record);
+    },
+    updateTodayRecordsList(record) {
+        const container = document.getElementById('today-records-list');
+        container.innerHTML = '';
+        const allRecords = [];
+        if (record.intake && record.intake.length > 0) {
+            record.intake.forEach(item => {
+                allRecords.push({
+                    type: 'intake',
+                    name: item.displayText || item.food,
+                    calories: item.calories,
+                    time: item.time || ''
+                });
+            });
+        }
+        if (record.exercise && record.exercise.length > 0) {
+            record.exercise.forEach(item => {
+                allRecords.push({
+                    type: 'exercise',
+                    name: item.displayText || item.activity,
+                    calories: item.calories,
+                    time: item.time || ''
+                });
+            });
+        }
+        allRecords.sort((a, b) => {
+            if (!a.time && !b.time) return 0;
+            if (!a.time) return 1;
+            if (!b.time) return -1;
+            return b.time.localeCompare(a.time);
+        });
+        if (allRecords.length === 0) {
+            container.innerHTML = '<div class="empty-records">暂无记录，快去添加吧~</div>';
+            return;
+        }
+        allRecords.forEach(item => {
+            const recordDiv = document.createElement('div');
+            recordDiv.className = 'record-item';
+            const icon = item.type === 'intake' ? '🍜' : '🏃';
+            const caloriesText = item.type === 'intake' ? `+${item.calories}` : `-${item.calories}`;
+            recordDiv.innerHTML = `
+                <div class="record-icon ${item.type}">${icon}</div>
+                <div class="record-info">
+                    <div class="record-name">${item.name}</div>
+                    <div class="record-time">${item.time || '刚刚'}</div>
+                </div>
+                <div class="record-calories ${item.type}">${caloriesText} 大卡</div>
+            `;
+            container.appendChild(recordDiv);
+        });
+    },
+    updateDeficitCircle(intake, exercise, tdee, targetDeficit) {
+        const intakeCircle = document.getElementById('intake-progress');
+        const excessCircle = document.getElementById('intake-excess-progress');
+        const exerciseCircle = document.getElementById('exercise-progress');
+        const targetMarker = document.getElementById('target-marker');
+        const targetDisplay = document.getElementById('circle-target-deficit');
+        const circumference = 251.33;
+        const totalBurn = (tdee || 0) + exercise;
+        targetDeficit = targetDeficit || 400;
+        targetDisplay.textContent = targetDeficit;
+        if (totalBurn === 0) {
+            intakeCircle.style.strokeDashoffset = circumference;
+            excessCircle.style.strokeDashoffset = circumference;
+            exerciseCircle.style.strokeDashoffset = circumference;
+            targetMarker.style.display = 'none';
+            return;
+        }
+        // 摄入弧（红色）- 最多填满整圈
+        const intakeRatio = Math.min(intake / totalBurn, 1);
+        const intakeArc = intakeRatio * circumference;
+        intakeCircle.style.strokeDasharray = circumference;
+        intakeCircle.style.strokeDashoffset = circumference - intakeArc;
+        // 超标弧（深色）- 摄入超过消耗的部分，从顶部重新开始
+        const excess = Math.max(intake - totalBurn, 0);
+        const excessRatio = Math.min(excess / totalBurn, 1);
+        const excessArc = excessRatio * circumference;
+        excessCircle.style.strokeDasharray = circumference;
+        excessCircle.style.strokeDashoffset = circumference - excessArc;
+        // 消耗弧（绿色）- 总消耗（基础+运动），紧跟摄入弧之后（超标时不显示）
+        if (intake >= totalBurn) {
+            exerciseCircle.style.strokeDashoffset = circumference;
+        } else {
+            const exerciseRatio = 1 - intakeRatio;
+            const exerciseArc = exerciseRatio * circumference;
+            exerciseCircle.style.strokeDasharray = exerciseArc + ' ' + (circumference - exerciseArc);
+            exerciseCircle.style.strokeDashoffset = -intakeArc;
+        }
+        // 目标缺口标记
+        const targetIntake = totalBurn - targetDeficit;
+        if (targetIntake > 0 && targetIntake < totalBurn) {
+            const targetAngle = (targetIntake / totalBurn) * 360 + 90;
+            targetMarker.setAttribute('transform', 'rotate(' + targetAngle + ', 50, 50)');
+            targetMarker.style.display = '';
+        } else {
+            targetMarker.style.display = 'none';
+        }
+    },
+    calculateStreakDays() {
+        if (!this.state.user) return 0;
+        const records = Storage.getRecords();
+        const today = Storage.getToday();
+        let streak = 0;
+        let currentDate = new Date();
+        while (true) {
+            const dateStr = Storage.formatDate(currentDate);
+            const record = records[dateStr];
+            if (!record || !record.intake || record.intake.length === 0) {
+                if (dateStr === today && streak === 0) {
+                    currentDate.setDate(currentDate.getDate() - 1);
+                    continue;
+                }
+                break;
+            }
+            const deficit = this.state.user.tdee + (record.totalExercise || 0) - (record.totalIntake || 0);
+            if (deficit >= this.state.user.targetDeficit * 0.8) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    },
+    initStatsPage() {
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const quickBtns = document.querySelectorAll('.quick-date-btn');
+        const today = new Date();
+        const todayStr = Storage.formatDate(today);
+        const weekAgo = new Date(today);
+        weekAgo.setDate(weekAgo.getDate() - 6);
+        const weekAgoStr = Storage.formatDate(weekAgo);
+        startDateInput.value = weekAgoStr;
+        endDateInput.value = todayStr;
+        this.state.startDate = weekAgoStr;
+        this.state.endDate = todayStr;
+        startDateInput.addEventListener('change', () => {
+            this.state.startDate = startDateInput.value;
+            quickBtns.forEach(b => b.classList.remove('active'));
+            this.updateStatsPage();
+        });
+        endDateInput.addEventListener('change', () => {
+            this.state.endDate = endDateInput.value;
+            quickBtns.forEach(b => b.classList.remove('active'));
+            this.updateStatsPage();
+        });
+        quickBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                quickBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const days = parseInt(btn.dataset.days);
+                const end = new Date();
+                const start = new Date();
+                start.setDate(start.getDate() - days + 1);
+                startDateInput.value = Storage.formatDate(start);
+                endDateInput.value = Storage.formatDate(end);
+                this.state.startDate = Storage.formatDate(start);
+                this.state.endDate = Storage.formatDate(end);
+                this.updateStatsPage();
+            });
+        });
+    },
+    getRecordsByDateRange(startDate, endDate) {
+        const records = Storage.getRecords();
+        const result = [];
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const current = new Date(start);
+        while (current <= end) {
+            const dateStr = Storage.formatDate(current);
+            result.push({
+                date: dateStr,
+                ...Storage.getRecord(dateStr)
+            });
+            current.setDate(current.getDate() + 1);
+        }
+        return result;
+    },
+    updateStatsPage() {
+        const startDate = this.state.startDate || Storage.formatDate(new Date(Date.now() - 6 * 24 * 60 * 60 * 1000));
+        const endDate = this.state.endDate || Storage.getToday();
+        const records = this.getRecordsByDateRange(startDate, endDate);
+        this.drawChart(records);
+        let totalDeficit = 0, achieveDays = 0, validDays = 0;
+        records.forEach(record => {
+            if (record.intake && record.intake.length > 0) {
+                validDays++;
+                totalDeficit += record.deficit || 0;
+                if (this.state.user && record.deficit >= this.state.user.targetDeficit * 0.8) achieveDays++;
+            }
+        });
+        const avgDeficit = validDays > 0 ? Math.round(totalDeficit / validDays) : 0;
+        document.getElementById('avg-deficit').textContent = avgDeficit;
+        document.getElementById('achieve-days').textContent = achieveDays;
+        document.getElementById('total-deficit').textContent = totalDeficit;
+        document.getElementById('est-weight-loss').textContent = Calculator.estimateWeightLoss(totalDeficit);
+        this.updateHistoryList(records);
+    },
+    drawChart(records) {
+        const canvas = document.getElementById('deficit-chart');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.offsetWidth * 2;
+        canvas.height = canvas.offsetHeight * 2;
+        ctx.scale(2, 2);
+        const width = canvas.offsetWidth;
+        const height = canvas.offsetHeight;
+        const padding = { top: 30, right: 20, bottom: 40, left: 50 };
+        const chartWidth = width - padding.left - padding.right;
+        const chartHeight = height - padding.top - padding.bottom;
+        ctx.clearRect(0, 0, width, height);
+        const targetDeficit = this.state.user?.targetDeficit || 400;
+        const deficits = records.map(r => r.deficit || 0);
+        const maxDeficit = Math.max(...deficits, targetDeficit, 500);
+        const minDeficit = 0;
+        const range = maxDeficit - minDeficit || 1;
+        ctx.strokeStyle = '#eee';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = padding.top + (chartHeight / 4) * i;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, y);
+            ctx.lineTo(width - padding.right, y);
+            ctx.stroke();
+        }
+        const barWidth = chartWidth / records.length;
+        const barGap = Math.max(2, barWidth * 0.2);
+        const actualBarWidth = Math.max(8, barWidth - barGap);
+        records.forEach((record, index) => {
+            const x = padding.left + barWidth * index + (barWidth - actualBarWidth) / 2;
+            const deficit = record.deficit || 0;
+            const barHeight = Math.max(2, (deficit / range) * chartHeight);
+            const y = padding.top + chartHeight - barHeight;
+            const achieved = deficit >= targetDeficit;
+            ctx.fillStyle = achieved ? '#2ecc71' : (deficit > 0 ? '#f39c12' : '#bdc3c7');
+            ctx.beginPath();
+            ctx.roundRect(x, y, actualBarWidth, barHeight, 4);
+            ctx.fill();
+        });
+        const targetY = padding.top + chartHeight - ((targetDeficit - minDeficit) / range) * chartHeight;
+        ctx.strokeStyle = '#e74c3c';
+        ctx.setLineDash([5, 5]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, targetY);
+        ctx.lineTo(width - padding.right, targetY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('目标', width - padding.right, targetY - 5);
+        ctx.fillStyle = '#7f8c8d';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        records.forEach((record, index) => {
+            const x = padding.left + barWidth * index + barWidth / 2;
+            const date = new Date(record.date);
+            const label = `${date.getMonth() + 1}/${date.getDate()}`;
+            ctx.fillText(label, x, height - 10);
+        });
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const value = Math.round(minDeficit + (range / 4) * (4 - i));
+            const y = padding.top + (chartHeight / 4) * i;
+            ctx.fillText(value, padding.left - 5, y + 4);
+        }
+    },
+    updateHistoryList(records) {
+        const container = document.getElementById('history-list');
+        container.innerHTML = '';
+        const validRecords = records.filter(r => r.intake && r.intake.length > 0).reverse();
+        if (validRecords.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:#7f8c8d;padding:20px;">暂无记录</p>';
+            return;
+        }
+        validRecords.forEach(record => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            const date = new Date(record.date);
+            const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
+            const targetDeficit = this.state.user?.targetDeficit || 400;
+            const achieved = (record.deficit || 0) >= targetDeficit;
+            item.innerHTML = `
+                <div class="history-date">${dateStr} ${achieved ? '<span style="color:#2ecc71;font-size:12px;">达标</span>' : ''}</div>
+                <div class="history-detail">
+                    <span>摄入 ${record.totalIntake || 0} | 运动 ${record.totalExercise || 0}</span>
+                    <span class="history-deficit">缺口 ${record.deficit || 0}</span>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    },
+    exportData() {
+        const data = Storage.exportData();
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `轻享瘦数据_${Storage.getToday()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.showToast('数据已导出', 'success');
+    },
+    showToast(message, type = 'info') {
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) existingToast.remove();
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+};
+document.addEventListener('DOMContentLoaded', () => { Auth.init(); App.init(); });
+    </script>
+</body>
+</html>

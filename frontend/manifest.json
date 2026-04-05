@@ -1,0 +1,27 @@
+{
+  "name": "轻享瘦",
+  "appid": "wxaed7a0022bd39c36",
+  "description": "热量缺口管理，科学减重",
+  "versionName": "1.0.0",
+  "versionCode": "100",
+  "transformPx": false,
+  "mp-weixin": {
+    "appid": "wxaed7a0022bd39c36",
+    "setting": {
+      "urlCheck": false,
+      "es6": true,
+      "enhance": true,
+      "postcss": true,
+      "minified": true
+    },
+    "usingComponents": true,
+    "permission": {
+      "scope.userLocation": {
+        "desc": "用于记录运动位置"
+      }
+    },
+    "requiredBackgroundModes": []
+  },
+  "quickapp": {},
+  "app-plus": {}
+}

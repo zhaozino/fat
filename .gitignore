@@ -1,0 +1,4 @@
+.claude
+frontend/node_modules
+backend/.idea
+backend/target

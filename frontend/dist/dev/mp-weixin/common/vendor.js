@@ -8229,7 +8229,7 @@ const createHook = (lifecycle) => (hook, target = getCurrentInstance()) => {
 };
 const onShow = /* @__PURE__ */ createHook(ON_SHOW);
 const onLaunch = /* @__PURE__ */ createHook(ON_LAUNCH);
-const BASE_URL = "/api";
+const BASE_URL = "http://192.168.99.2:30080/api";
 function request(options) {
   return new Promise((resolve2, reject) => {
     const token = index.getStorageSync("token");

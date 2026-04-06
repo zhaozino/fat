@@ -1,0 +1,97 @@
+<view class="page">
+  <view class="header"><text class="title">统计</text></view>
+
+  <!-- 日期范围选择 -->
+  <view class="card date-range-selector">
+    <text class="date-range-header">选择时间范围</text>
+    <view class="date-range-inputs">
+      <view class="date-input-group">
+        <text class="label">开始日期</text>
+        <picker mode="date" value="{{startDate}}" bindchange="onStartChange">
+          <view class="date-input">{{startDate}}</view>
+        </picker>
+      </view>
+      <text class="date-separator">至</text>
+      <view class="date-input-group">
+        <text class="label">结束日期</text>
+        <picker mode="date" value="{{endDate}}" bindchange="onEndChange">
+          <view class="date-input">{{endDate}}</view>
+        </picker>
+      </view>
+    </view>
+    <view class="quick-date-btns">
+      <view
+        wx:for="{{[7, 14, 30]}}"
+        wx:key="*this"
+        class="quick-date-btn {{quickDays === item ? 'active' : ''}}"
+        data-days="{{item}}"
+        bindtap="selectQuick"
+      >最近{{item}}天</view>
+    </view>
+  </view>
+
+  <!-- 图表 -->
+  <view class="card chart-container">
+    <text class="card-title">热量缺口趋势</text>
+    <canvas
+      canvas-id="deficit-chart"
+      id="deficit-chart"
+      class="chart"
+    />
+  </view>
+
+  <!-- 数据汇总 -->
+  <view class="card stats-summary">
+    <text class="card-title">数据汇总</text>
+    <view class="summary-grid">
+      <view class="summary-item">
+        <text class="label">平均缺口</text>
+        <view class="value-row">
+          <text class="value">{{summary.avgDeficit}}</text>
+          <text class="small">大卡/天</text>
+        </view>
+      </view>
+      <view class="summary-item">
+        <text class="label">达标天数</text>
+        <view class="value-row">
+          <text class="value">{{summary.achieveDays}}</text>
+          <text class="small">天</text>
+        </view>
+      </view>
+      <view class="summary-item">
+        <text class="label">总缺口</text>
+        <view class="value-row">
+          <text class="value">{{summary.totalDeficit}}</text>
+          <text class="small">大卡</text>
+        </view>
+      </view>
+      <view class="summary-item">
+        <text class="label">预估减重</text>
+        <view class="value-row">
+          <text class="value">{{summary.estWeightLoss}}</text>
+          <text class="small">kg</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 历史记录 -->
+  <view class="card record-history">
+    <text class="card-title">历史记录</text>
+    <view wx:if="{{historyList.length === 0}}" class="empty">暂无记录</view>
+    <view
+      wx:for="{{historyList}}"
+      wx:key="date"
+      class="history-item"
+    >
+      <view class="history-date">
+        <text>{{item.dateLabel}}</text>
+        <text wx:if="{{item.achieved}}" class="achieved-tag"> 达标</text>
+      </view>
+      <view class="history-detail">
+        <text>摄入 {{item.totalIntakeRound}} | 运动 {{item.totalExerciseRound}}</text>
+        <text class="history-deficit">缺口 {{item.deficitRound}}</text>
+      </view>
+    </view>
+  </view>
+</view>

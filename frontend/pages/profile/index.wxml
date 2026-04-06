@@ -1,0 +1,97 @@
+<view class="page">
+  <view class="header"><text class="title">我的</text></view>
+
+  <!-- 用户信息展示 -->
+  <view class="card user-card">
+    <view class="user-avatar">👤</view>
+    <view class="user-info">
+      <text class="user-phone">{{maskedPhone}}</text>
+      <text class="user-sub">手机号登录</text>
+    </view>
+  </view>
+
+  <!-- 个人信息表单 -->
+  <view class="card">
+    <text class="card-title">个人信息</text>
+
+    <!-- 性别 -->
+    <view class="form-group">
+      <text class="label">性别</text>
+      <view class="gender-row">
+        <view
+          class="gender-btn {{gender === 'male' ? 'active' : ''}}"
+          bindtap="setGender"
+          data-gender="male"
+        >男</view>
+        <view
+          class="gender-btn {{gender === 'female' ? 'active' : ''}}"
+          bindtap="setGender"
+          data-gender="female"
+        >女</view>
+      </view>
+    </view>
+
+    <!-- 身高体重 -->
+    <view class="form-row">
+      <view class="form-group half">
+        <text class="label">身高 (cm)</text>
+        <input class="input" type="number" value="{{height}}" placeholder="170" bindinput="onHeightInput" />
+      </view>
+      <view class="form-group half">
+        <text class="label">体重 (kg)</text>
+        <input class="input" type="number" value="{{weight}}" placeholder="70" bindinput="onWeightInput" />
+      </view>
+    </view>
+
+    <!-- 年龄 -->
+    <view class="form-group">
+      <text class="label">年龄</text>
+      <input class="input" type="number" value="{{age}}" placeholder="25" bindinput="onAgeInput" />
+    </view>
+
+    <!-- 活动水平 -->
+    <view class="form-group">
+      <text class="label">活动水平</text>
+      <picker
+        mode="selector"
+        range="{{activityLabels}}"
+        value="{{activityIndex}}"
+        bindchange="onActivityChange"
+      >
+        <view class="picker-row">
+          <text>{{activityLabels[activityIndex]}}</text>
+          <text class="arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 目标缺口 -->
+    <view class="form-group">
+      <text class="label">目标缺口 (大卡/天)</text>
+      <input class="input" type="number" value="{{targetDeficit}}" placeholder="400" bindinput="onTargetInput" />
+      <text class="hint">建议 300~500 大卡</text>
+    </view>
+
+    <button class="save-btn" disabled="{{saving}}" bindtap="saveProfile">
+      {{saving ? '保存中…' : '保存信息'}}
+    </button>
+  </view>
+
+  <!-- BMR 结果 -->
+  <view class="card bmr-card" wx:if="{{bmrValue}}">
+    <text class="bmr-label">基础代谢 (BMR)</text>
+    <text class="bmr-val">{{bmrValueRound}}</text>
+    <text class="bmr-unit">大卡</text>
+  </view>
+
+  <!-- 数据操作 -->
+  <view class="card actions-card">
+    <button class="action-btn" bindtap="exportData">导出数据</button>
+    <button class="action-btn danger" bindtap="clearData">清除数据</button>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="card">
+    <button class="action-btn danger full" bindtap="logout">退出登录</button>
+  </view>
+</view>

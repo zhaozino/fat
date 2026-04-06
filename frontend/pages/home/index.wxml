@@ -1,0 +1,113 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="header">
+    <text class="title">轻享瘦</text>
+    <text class="sub">科学管理热量，轻松达成目标</text>
+  </view>
+
+  <!-- 今日概览卡片 -->
+  <view class="card today-card">
+    <text class="card-title">今日概览</text>
+    <!-- 圆环 canvas -->
+    <view class="deficit-display">
+      <view class="deficit-circle">
+        <canvas
+          canvas-id="deficit-canvas"
+          id="deficit-canvas"
+          class="circle-canvas"
+        />
+        <view class="deficit-value">
+          <text class="deficit-num">{{deficitRound}}</text>
+          <text class="deficit-sub">
+            <text class="burn-val">{{targetDeficit}}</text> 大卡
+          </text>
+        </view>
+      </view>
+    </view>
+    <text class="circle-label">热量缺口</text>
+    <view class="circle-legend">
+      <view class="legend-item">
+        <view class="legend-dot intake"></view>
+        <text>摄入</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot exercise"></view>
+        <text>消耗</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot excess"></view>
+        <text>摄入超标</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot target"></view>
+        <text>目标缺口</text>
+      </view>
+    </view>
+    <!-- 三列统计 -->
+    <view class="stats-row">
+      <view class="stat-item">
+        <text class="stat-label">摄入</text>
+        <text class="stat-val">{{totalIntakeRound}}</text>
+        <text class="stat-unit">大卡</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">消耗</text>
+        <text class="stat-val">{{totalExerciseRound}}</text>
+        <text class="stat-unit">大卡</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-label">基础代谢</text>
+        <text class="stat-val">{{bmrRound}}</text>
+        <text class="stat-unit">大卡</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- AI 鼓励消息 -->
+  <view class="card ai-card">
+    <view class="ai-avatar">AI</view>
+    <view class="ai-bubble">
+      <text>{{aiMsg}}</text>
+    </view>
+  </view>
+
+  <!-- 快速记录 -->
+  <view class="card">
+    <text class="card-title">快速记录</text>
+    <view class="quick-grid">
+      <button
+        wx:for="{{quickBtns}}"
+        wx:key="action"
+        class="quick-btn"
+        data-action="{{item.action}}"
+        bindtap="goRecord"
+      >{{item.label}}</button>
+    </view>
+  </view>
+
+  <!-- 今日记录 -->
+  <view class="card today-records">
+    <text class="card-title">今日记录</text>
+    <view wx:if="{{todayRecords.length === 0}}" class="empty-records">
+      <text>暂无记录，快去添加吧~</text>
+    </view>
+    <block wx:else>
+      <view
+        wx:for="{{todayRecords}}"
+        wx:key="index"
+        class="record-item"
+      >
+        <view class="record-icon {{item.type}}">
+          <text>{{item.type === 'intake' ? '🍜' : '🏃'}}</text>
+        </view>
+        <view class="record-info">
+          <text class="record-name">{{item.name}}</text>
+          <text class="record-time">{{item.time || '刚刚'}}</text>
+        </view>
+        <text class="record-calories {{item.type}}">
+          {{item.type === 'intake' ? '+' : '-'}}{{item.calories}} 大卡
+        </text>
+      </view>
+    </block>
+  </view>
+</view>

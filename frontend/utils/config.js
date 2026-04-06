@@ -1,0 +1,3 @@
+module.exports = {
+  BASE_URL: 'https://your-api-domain.com/api'
+}

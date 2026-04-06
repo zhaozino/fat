@@ -1,0 +1,59 @@
+<view class="page">
+  <view class="header"><text class="title">记录</text></view>
+
+  <!-- 消息列表 -->
+  <scroll-view class="chat-scroll" scroll-y scroll-top="{{scrollTop}}" scroll-with-animation>
+    <view class="chat-list">
+      <view class="msg ai">
+        <view class="avatar">AI</view>
+        <view class="bubble ai-bubble">
+          <text>你好！告诉我你吃了什么或者做了什么运动，我来帮你记录~</text>
+          <text class="hint">支持三种输入方式：</text>
+          <text class="hint">文字输入 | 拍照识别 | 语音输入</text>
+        </view>
+      </view>
+
+      <view wx:for="{{messages}}" wx:key="id" class="msg {{item.role}}">
+        <view wx:if="{{item.role === 'ai'}}" class="avatar">AI</view>
+        <!-- 图片消息 -->
+        <view wx:if="{{item.imageUrl}}" class="bubble user-bubble img-msg">
+          <image src="{{item.imageUrl}}" mode="widthFix" class="msg-image" />
+          <text wx:if="{{item.text}}">{{item.text}}</text>
+        </view>
+        <view wx:else class="bubble {{item.role}}-bubble">
+          <text>{{item.text}}</text>
+        </view>
+        <view wx:if="{{item.role === 'user'}}" class="avatar user-av">我</view>
+      </view>
+
+      <view wx:if="{{loading}}" class="msg ai">
+        <view class="avatar">AI</view>
+        <view class="bubble ai-bubble">
+          <text class="loading-dots">识别中...</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区 -->
+  <view class="input-area">
+    <view class="camera-btn" bindtap="onCamera">
+      <image class="icon-img" src="/static/icons/camera.png" mode="aspectFit" />
+    </view>
+    <view class="input-wrapper">
+      <input
+        class="chat-input"
+        value="{{inputText}}"
+        placeholder="输入食物或运动..."
+        placeholder-class="ph"
+        confirm-type="send"
+        bindconfirm="onSend"
+        bindinput="onInputChange"
+        adjust-position="{{true}}"
+      />
+    </view>
+    <view class="send-btn" bindtap="onSend">
+      <image class="icon-img" src="/static/icons/send.png" mode="aspectFit" />
+    </view>
+  </view>
+</view>

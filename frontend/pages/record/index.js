@@ -2,8 +2,6 @@ var parseApi = require('../../api/parse').parseApi
 var fileApi = require('../../api/file').fileApi
 var recordApi = require('../../api/record').recordApi
 
-var plugin = requirePlugin('WechatSI')
-var voiceManager = plugin.getRecordRecognitionManager()
 var msgId = 0
 
 Page({
@@ -11,49 +9,7 @@ Page({
     messages: [],
     inputText: '',
     loading: false,
-    scrollTop: 0,
-    recording: false
-  },
-
-  onLoad: function () {
-    this.initVoice()
-  },
-
-  initVoice: function () {
-    var that = this
-
-    voiceManager.onStart = function () {
-      that.setData({ recording: true })
-    }
-
-    voiceManager.onRecognize = function (res) {
-      // 实时识别结果（可选：实时显示在输入框）
-      if (res.result) {
-        that.setData({ inputText: res.result })
-      }
-    }
-
-    voiceManager.onStop = function (res) {
-      that.setData({ recording: false })
-      if (res.result) {
-        that.setData({ inputText: res.result })
-      }
-    }
-
-    voiceManager.onError = function (res) {
-      that.setData({ recording: false })
-      wx.showToast({ title: '语音识别失败', icon: 'none' })
-    }
-  },
-
-  onVoiceStart: function () {
-    voiceManager.start({ lang: 'zh_CN' })
-  },
-
-  onVoiceEnd: function () {
-    if (this.data.recording) {
-      voiceManager.stop()
-    }
+    scrollTop: 0
   },
 
   onShow: function () {

@@ -2,6 +2,8 @@ package com.lightfit.service;
 
 import com.lightfit.config.CosConfig;
 import com.lightfit.dto.FileDTO;
+import com.qcloud.cos.COSClient;
+import com.qcloud.cos.http.HttpMethodName;
 import com.tencent.cloud.CosStsClient;
 import com.tencent.cloud.Response;
 import lombok.RequiredArgsConstructor;
@@ -9,8 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.net.URL;
 import java.time.LocalDate;
-import java.util.Properties;
+import java.util.Date;
 import java.util.TreeMap;
 
 @Slf4j
@@ -19,10 +22,30 @@ import java.util.TreeMap;
 public class FileService {
 
     private final CosConfig cosConfig;
+    private final COSClient cosClient;
 
     @Value("${cos.secret-id}")  private String secretId;
     @Value("${cos.secret-key}") private String secretKey;
     @Value("${cos.sts-duration:1800}") private int stsDuration;
+
+    /**
+     * 生成预签名上传 URL
+     * 前端直接用 PUT 请求上传，无需计算签名
+     */
+    public FileDTO.PresignedUrlResponse generatePresignedUrl(String userId, String ext) {
+        if (ext == null || ext.isEmpty()) {
+            ext = "jpg";
+        }
+        String key = String.format("lightfit/%s/%s/%d.%s", userId, LocalDate.now(), System.currentTimeMillis(), ext);
+
+        Date expiration = new Date(System.currentTimeMillis() + stsDuration * 1000L);
+        URL presignedUrl = cosClient.generatePresignedUrl(cosConfig.getBucket(), key, expiration, HttpMethodName.PUT);
+
+        FileDTO.PresignedUrlResponse resp = new FileDTO.PresignedUrlResponse();
+        resp.setUploadUrl(presignedUrl.toString());
+        resp.setFileUrl(String.format("https://%s.cos.%s.myqcloud.com/%s", cosConfig.getBucket(), cosConfig.getRegion(), key));
+        return resp;
+    }
 
     /**
      * 生成腾讯云 COS STS 临时上传凭证

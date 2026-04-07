@@ -14,4 +14,10 @@ public class FileDTO {
         private String region;
         private String keyPrefix;     // 建议的对象键前缀，如 lightfit/{userId}/2026-04-02/
     }
+
+    @Data
+    public static class PresignedUrlResponse {
+        private String uploadUrl;     // 预签名上传 URL
+        private String fileUrl;       // 上传成功后的访问 URL
+    }
 }

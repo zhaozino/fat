@@ -54,13 +54,14 @@ Page({
         that.setData({ loading: true })
         that.addMsg('user', that.data.inputText || '', tempPath)
 
-        fileApi.getUploadToken().then(function (token) {
-          return fileApi.uploadToCos(token, tempPath)
-        }).then(function (cosUrl) {
+        var ext = tempPath.split('.').pop() || 'jpg'
+        fileApi.getUploadUrl(ext).then(function (resp) {
+          return fileApi.uploadWithPresignedUrl(resp, tempPath)
+        }).then(function (fileUrl) {
           var text = that.data.inputText.trim() || null
           that.setData({ inputText: '' })
-          return that.parseAndSave(text, cosUrl)
-        }).catch(function () {
+          return that.parseAndSave(text, fileUrl)
+        }).catch(function (err) {
           that.setData({ loading: false })
           that.addMsg('ai', '图片上传失败，请重试')
         })

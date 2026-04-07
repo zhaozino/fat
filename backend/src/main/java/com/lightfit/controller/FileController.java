@@ -15,6 +15,17 @@ public class FileController {
     private final FileService fileService;
 
     /**
+     * GET /api/file/upload-url?ext=jpg
+     * 返回预签名上传 URL，前端直接 PUT 上传
+     */
+    @GetMapping("/upload-url")
+    public ResponseEntity<FileDTO.PresignedUrlResponse> getUploadUrl(
+            Authentication auth,
+            @RequestParam(required = false) String ext) {
+        return ResponseEntity.ok(fileService.generatePresignedUrl(auth.getName(), ext));
+    }
+
+    /**
      * GET /api/file/upload-token
      * 返回 COS STS 临时凭证，前端直传图片使用
      */

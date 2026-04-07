@@ -37,23 +37,74 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: DB_HOST
-              value: mysql
-            - name: DB_PORT
-              value: "3306"
-            - name: DB_NAME
-              value: lightfit
-            - name: DB_USER
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/lightfit?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+            - name: SPRING_DATASOURCE_USERNAME
               value: root
-            - name: DB_PASSWORD
+            - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: MYSQL_ROOT_PASSWORD
-            - name: SMS_MOCK_MODE
-              value: "true"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: com.mysql.cj.jdbc.Driver
             - name: SERVER_PORT
               value: "8080"
+            - name: SERVER_SERVLET_CONTEXT_PATH
+              value: "/api"
+            - name: jwt.secret
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: JWT_SECRET
+            - name: jwt.expire-days
+              value: "7"
+            - name: sms.secret-id
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SMS_SECRET_ID
+            - name: sms.secret-key
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SMS_SECRET_KEY
+            - name: sms.app-id
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SMS_APP_ID
+            - name: sms.sign-name
+              value: "轻享瘦"
+            - name: sms.template-id
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SMS_TEMPLATE_ID
+            - name: sms.mock-mode
+              value: "true"
+            - name: cos.secret-id
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: COS_SECRET_ID
+            - name: cos.secret-key
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: COS_SECRET_KEY
+            - name: cos.region
+              value: "ap-guangzhou"
+            - name: cos.bucket
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: COS_BUCKET
+            - name: dashscope.api-key
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: DASHSCOPE_API_KEY
           envFrom:
             - secretRef:
                 name: backend-secret

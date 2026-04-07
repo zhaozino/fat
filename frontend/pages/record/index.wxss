@@ -38,8 +38,8 @@
 
 /* 用户消息靠右 */
 .msg-right {
-  flex-direction: row-reverse;
-  justify-content: flex-start;
+  flex-direction: row;
+  justify-content: flex-end;
 }
 
 /* 头像 */

@@ -74,12 +74,12 @@
 .quick-date-btn {
   flex: 1;
   padding: 8px;
+  display: flex; align-items: center; justify-content: center;
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #fff;
   color: #7f8c8d;
   font-size: 13px;
-  text-align: center;
   margin: 0 4px;
 }
 .quick-date-btn.active {

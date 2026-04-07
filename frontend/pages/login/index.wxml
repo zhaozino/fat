@@ -1,7 +1,7 @@
 <view class="login-page">
   <view class="logo-area">
     <view class="logo-icon">瘦</view>
-    <text class="logo-title">轻享瘦</text>
+    <text class="logo-title">轻卡笔记</text>
     <text class="logo-sub">科学管理热量，轻松达成目标</text>
   </view>
 

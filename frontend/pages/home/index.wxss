@@ -190,6 +190,7 @@
 }
 .quick-btn {
   flex: 1;
+  display: flex; align-items: center; justify-content: center;
   padding: 12px 8px;
   border: none;
   border-radius: 12px;

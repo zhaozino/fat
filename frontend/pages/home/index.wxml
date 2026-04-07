@@ -1,7 +1,7 @@
 <view class="page">
   <!-- 头部 -->
   <view class="header">
-    <text class="title">轻享瘦</text>
+    <text class="title">轻卡笔记</text>
     <text class="sub">科学管理热量，轻松达成目标</text>
   </view>
 

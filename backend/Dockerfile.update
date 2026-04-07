@@ -1,0 +1,2 @@
+FROM lightfit-backend:latest
+COPY target/lightfit-backend-1.0.0.jar /app/app.jar

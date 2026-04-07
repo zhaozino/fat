@@ -78,6 +78,24 @@ class FoodParseAgentTest {
                 "一碗米饭热量应在150-400大卡范围，实际=" + resp.getCalories());
     }
 
+    @Test
+    void testParseBoiledEgg() {
+        ParseDTO.ParseResponse resp = agent.parse("test-user", "吃了一个水煮蛋", null);
+
+        System.out.println("===== 千问解析结果（水煮蛋） =====");
+        System.out.println("type:        " + resp.getType());
+        System.out.println("name:        " + resp.getName());
+        System.out.println("calories:    " + resp.getCalories());
+        System.out.println("displayText: " + resp.getDisplayText());
+        System.out.println("isEstimated: " + resp.getIsEstimated());
+        System.out.println("==================================");
+
+        assertEquals("food", resp.getType());
+        // 一个水煮蛋约50g，每100g约144大卡，一个约70-80大卡
+        assertTrue(resp.getCalories() >= 50 && resp.getCalories() <= 100,
+                "一个水煮蛋热量应在50-100大卡范围，实际=" + resp.getCalories());
+    }
+
     private void setField(Object obj, String fieldName, String value) {
         try {
             var field = obj.getClass().getDeclaredField(fieldName);

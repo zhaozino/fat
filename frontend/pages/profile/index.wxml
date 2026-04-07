@@ -90,6 +90,25 @@
     <button class="action-btn danger" bindtap="clearData">清除数据</button>
   </view>
 
+  <!-- 问题反馈 -->
+  <view class="card">
+    <text class="card-title">问题反馈</text>
+    <textarea
+      class="feedback-input"
+      value="{{feedbackText}}"
+      placeholder="请输入您的问题或建议…"
+      placeholder-class="ph"
+      maxlength="500"
+      bindinput="onFeedbackInput"
+    />
+    <view class="feedback-footer">
+      <text class="feedback-count">{{feedbackText.length || 0}}/500</text>
+      <button class="feedback-btn" disabled="{{feedbackSubmitting}}" bindtap="submitFeedback">
+        {{feedbackSubmitting ? '提交中…' : '提交反馈'}}
+      </button>
+    </view>
+  </view>
+
   <!-- 退出登录 -->
   <view class="card">
     <button class="action-btn danger full" bindtap="logout">退出登录</button>

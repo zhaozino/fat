@@ -6,7 +6,7 @@
     <view class="chat-list">
       <!-- 欢迎消息 -->
       <view class="msg msg-left">
-        <view class="avatar ai-av">🥗</view>
+        <view class="avatar ai-av">AI</view>
         <view class="bubble ai-bubble">
           <text>你好！告诉我你吃了什么或者做了什么运动，我来帮你记录~</text>
           <text class="hint">支持三种输入方式：</text>
@@ -17,7 +17,7 @@
       <block wx:for="{{messages}}" wx:key="id">
         <!-- AI 消息：头像左，气泡靠左 -->
         <view wx:if="{{item.role === 'ai'}}" class="msg msg-left">
-          <view class="avatar ai-av">🥗</view>
+          <view class="avatar ai-av">AI</view>
           <view class="bubble ai-bubble">
             <text>{{item.text}}</text>
           </view>
@@ -31,13 +31,13 @@
           <view wx:else class="bubble user-bubble">
             <text>{{item.text}}</text>
           </view>
-          <view class="avatar user-av">😊</view>
+          <view class="avatar user-av">我</view>
         </view>
       </block>
 
       <!-- loading -->
       <view wx:if="{{loading}}" class="msg msg-left">
-        <view class="avatar ai-av">🥗</view>
+        <view class="avatar ai-av">AI</view>
         <view class="bubble ai-bubble">
           <text class="loading-dots">识别中...</text>
         </view>

@@ -46,17 +46,17 @@
 .avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
-  font-size: 20px;
+  color: #fff; font-size: 12px; font-weight: 600;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 .ai-av {
-  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
   margin-right: 10px;
 }
 .user-av {
-  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+  background: linear-gradient(135deg, #3498db, #2980b9);
   margin-left: 10px;
 }
 

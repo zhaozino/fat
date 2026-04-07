@@ -39,6 +39,14 @@ CREATE TABLE IF NOT EXISTS intake_item (
     created_at      VARCHAR(30) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 问题反馈表
+CREATE TABLE IF NOT EXISTS feedback (
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id         VARCHAR(20) NOT NULL,
+    content         TEXT NOT NULL,
+    created_at      VARCHAR(30) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 运动明细表
 CREATE TABLE IF NOT EXISTS exercise_item (
     id              BIGINT AUTO_INCREMENT PRIMARY KEY,

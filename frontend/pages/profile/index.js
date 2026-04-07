@@ -1,4 +1,5 @@
 var userApi = require('../../api/user').userApi
+var feedbackApi = require('../../api/feedback').feedbackApi
 
 var app = getApp()
 
@@ -25,7 +26,9 @@ Page({
     activityIndex: 2,
     targetDeficit: 400,
     maskedPhone: '未登录',
-    activityLabels: activityLabels
+    activityLabels: activityLabels,
+    feedbackText: '',
+    feedbackSubmitting: false
   },
 
   onShow: function () {
@@ -112,6 +115,28 @@ Page({
       wx.showToast({ title: '保存成功', icon: 'success' })
     }).catch(function () {}).then(function () {
       that.setData({ saving: false })
+    })
+  },
+
+  onFeedbackInput: function (e) {
+    this.setData({ feedbackText: e.detail.value })
+  },
+
+  submitFeedback: function () {
+    var that = this
+    var text = that.data.feedbackText.trim()
+    if (!text) {
+      wx.showToast({ title: '请输入反馈内容', icon: 'none' })
+      return
+    }
+    that.setData({ feedbackSubmitting: true })
+    feedbackApi.submit(text).then(function () {
+      that.setData({ feedbackText: '' })
+      wx.showToast({ title: '感谢您的反馈！', icon: 'success' })
+    }).catch(function () {
+      wx.showToast({ title: '提交失败，请重试', icon: 'none' })
+    }).then(function () {
+      that.setData({ feedbackSubmitting: false })
     })
   },
 

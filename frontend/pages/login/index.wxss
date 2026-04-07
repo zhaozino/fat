@@ -67,15 +67,17 @@
   overflow: hidden;
 }
 
+.prefix-picker {
+  flex-shrink: 0;
+  border-right: 1rpx solid #eee;
+}
 .prefix {
   padding: 0 24rpx;
   font-size: 30rpx;
   color: #333;
   font-weight: 500;
-  border-right: 1rpx solid #eee;
   height: 88rpx;
-  line-height: 88rpx;
-  flex-shrink: 0;
+  display: flex; align-items: center;
 }
 
 .phone-input {

@@ -19,8 +19,14 @@ public class AuthController {
     @PostMapping("/send-sms")
     public ResponseEntity<Map<String, Object>> sendSms(
             @Valid @RequestBody AuthDTO.SendSmsRequest req) {
-        authService.sendCode(req.getPhone());
-        return ResponseEntity.ok(Map.of("success", true, "message", "验证码已发送"));
+        String mockCode = authService.sendCode(req.getPhone());
+        var resp = new java.util.HashMap<String, Object>();
+        resp.put("success", true);
+        resp.put("message", "验证码已发送");
+        if (mockCode != null) {
+            resp.put("code", mockCode);
+        }
+        return ResponseEntity.ok(resp);
     }
 
     @PostMapping("/verify")

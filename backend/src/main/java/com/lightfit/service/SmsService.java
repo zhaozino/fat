@@ -31,7 +31,7 @@ public class SmsService {
     private static final long CODE_TTL_MS   = 5 * 60 * 1000L;  // 5 分钟
     private static final long RATE_LIMIT_MS = 60 * 1000L;       // 60 秒
 
-    public void send(String phone) {
+    public String send(String phone) {
         long now = System.currentTimeMillis();
         Long lastSent = rateLimitMap.get(phone);
         if (lastSent != null && now - lastSent < RATE_LIMIT_MS) {
@@ -44,7 +44,7 @@ public class SmsService {
 
         if (mockMode) {
             log.info("[短信模拟] 手机 {} 验证码：{}", phone, code);
-            return;
+            return code;
         }
 
         try {
@@ -58,6 +58,7 @@ public class SmsService {
             req.setPhoneNumberSet(new String[]{"+86" + phone});
             SendSmsResponse resp = client.SendSms(req);
             log.debug("短信发送结果: {}", resp.getSendStatusSet()[0].getMessage());
+            return null;
         } catch (Exception e) {
             codeCache.remove(phone);
             rateLimitMap.remove(phone);

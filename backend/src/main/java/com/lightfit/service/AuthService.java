@@ -20,8 +20,8 @@ public class AuthService {
 
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public void sendCode(String phone) {
-        smsService.send(phone);
+    public String sendCode(String phone) {
+        return smsService.send(phone);
     }
 
     @Transactional

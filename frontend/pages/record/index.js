@@ -46,25 +46,35 @@ Page({
 
   onCamera: function () {
     var that = this
+    console.log('[上传] 开始选择图片')
     wx.chooseImage({
       count: 1,
       sourceType: ['camera', 'album'],
       success: function (res) {
         var tempPath = res.tempFilePaths[0]
+        console.log('[上传] 选择图片成功:', tempPath)
         that.setData({ loading: true })
         that.addMsg('user', that.data.inputText || '', tempPath)
 
         var ext = tempPath.split('.').pop() || 'jpg'
+        console.log('[上传] 文件扩展名:', ext)
+
         fileApi.getUploadUrl(ext).then(function (resp) {
+          console.log('[上传] 获取预签名URL成功:', resp)
           return fileApi.uploadWithPresignedUrl(resp, tempPath)
         }).then(function (fileUrl) {
+          console.log('[上传] 上传成功, 文件URL:', fileUrl)
           var text = that.data.inputText.trim() || null
           that.setData({ inputText: '' })
           return that.parseAndSave(text, fileUrl)
         }).catch(function (err) {
+          console.error('[上传] 失败:', err)
           that.setData({ loading: false })
-          that.addMsg('ai', '图片上传失败，请重试')
+          that.addMsg('ai', '图片上传失败：' + (err.message || err.errMsg || JSON.stringify(err)))
         })
+      },
+      fail: function (err) {
+        console.error('[上传] 选择图片失败:', err)
       }
     })
   },

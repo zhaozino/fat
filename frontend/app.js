@@ -8,6 +8,8 @@ App({
   },
 
   onLaunch() {
+    var sysInfo = wx.getSystemInfoSync()
+    this.globalData.statusBarHeight = sysInfo.statusBarHeight || 20
     this.globalData.token = wx.getStorageSync('token') || ''
     this.checkAuth()
   },

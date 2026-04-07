@@ -14,6 +14,7 @@ Page({
   },
 
   onShow: function () {
+    this.setData({ statusBarHeight: app.globalData.statusBarHeight || 20 })
     if (!this.data.startDate) {
       this.selectQuickDays(7)
     } else {

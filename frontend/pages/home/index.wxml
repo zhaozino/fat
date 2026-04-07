@@ -1,6 +1,6 @@
 <view class="page">
   <!-- 头部 -->
-  <view class="header">
+  <view class="header" style="padding-top:{{statusBarHeight}}px">
     <text class="title">轻卡笔记</text>
     <text class="sub">科学管理热量，轻松达成目标</text>
   </view>

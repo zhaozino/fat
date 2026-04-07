@@ -1,6 +1,7 @@
 var parseApi = require('../../api/parse').parseApi
 var fileApi = require('../../api/file').fileApi
 var recordApi = require('../../api/record').recordApi
+var app = getApp()
 
 var msgId = 0
 
@@ -9,10 +10,11 @@ Page({
     messages: [],
     inputText: '',
     loading: false,
-    scrollTop: 0
+    scrollToId: ''
   },
 
   onShow: function () {
+    this.setData({ statusBarHeight: app.globalData.statusBarHeight || 20 })
     var action = wx.getStorageSync('quickAction')
     if (action) {
       wx.removeStorageSync('quickAction')
@@ -27,8 +29,11 @@ Page({
 
   addMsg: function (role, text, imageUrl) {
     var msgs = this.data.messages.slice()
-    msgs.push({ id: ++msgId, role: role, text: text, imageUrl: imageUrl || null })
-    this.setData({ messages: msgs, scrollTop: 99999 })
+    var id = ++msgId
+    msgs.push({ id: id, role: role, text: text, imageUrl: imageUrl || null })
+    this.setData({ messages: msgs, scrollToId: '' }, function () {
+      this.setData({ scrollToId: 'chat-bottom' })
+    })
   },
 
   onSend: function () {
@@ -65,7 +70,9 @@ Page({
 
   parseAndSave: function (text, imageUrl) {
     var that = this
-    that.setData({ loading: true })
+    that.setData({ loading: true, scrollToId: '' }, function () {
+      that.setData({ scrollToId: 'chat-bottom' })
+    })
     var mealType = that.getMealType()
 
     return parseApi.parse(text, imageUrl, mealType).then(function (parsed) {

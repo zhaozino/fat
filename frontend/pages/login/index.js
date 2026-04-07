@@ -23,6 +23,10 @@ Page({
     areaIndex: 0
   },
 
+  onShow: function () {
+    this.setData({ statusBarHeight: app.globalData.statusBarHeight || 20 })
+  },
+
   onAreaChange: function (e) {
     this.setData({ areaIndex: parseInt(e.detail.value), phone: '', phoneTip: '' })
   },

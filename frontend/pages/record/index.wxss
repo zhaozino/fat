@@ -1,7 +1,6 @@
 .page {
   display: flex; flex-direction: column;
-  min-height: 100vh; background: #f5f7f5;
-  padding-bottom: 120px;
+  height: 100vh; background: #f5f7f5;
 }
 
 .header {
@@ -17,7 +16,7 @@
   font-size: 16px; color: #2ecc71; font-weight: 600;
 }
 
-.chat-scroll { flex: 1; overflow: hidden; }
+.chat-scroll { flex: 1; overflow: hidden; min-height: 0; }
 .chat-list {
   padding: 16px 16px 24px;
 }
@@ -87,16 +86,13 @@
 .loading-dots { color: #95a5a6; }
 
 .input-area {
-  position: fixed;
-  bottom: 0;
-  left: 0; right: 0;
+  flex-shrink: 0;
   display: flex; align-items: center;
   padding: 8px 12px;
   padding-bottom: calc(8px + env(safe-area-inset-bottom));
   background: #f7f7f7;
   border-top: 1px solid #e5e5e5;
   box-sizing: border-box;
-  z-index: 50;
 }
 
 .camera-btn {

@@ -33,6 +33,7 @@ Page({
   },
 
   onShow: function () {
+    this.setData({ statusBarHeight: app.globalData.statusBarHeight || 20 })
     this.loadProfile()
   },
 

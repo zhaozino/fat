@@ -92,20 +92,25 @@
 
   <!-- 问题反馈 -->
   <view class="card">
-    <text class="card-title">问题反馈</text>
-    <textarea
-      class="feedback-input"
-      value="{{feedbackText}}"
-      placeholder="请输入您的问题或建议…"
-      placeholder-class="ph"
-      maxlength="500"
-      bindinput="onFeedbackInput"
-    />
-    <view class="feedback-footer">
-      <text class="feedback-count">{{feedbackText.length || 0}}/500</text>
-      <button class="feedback-btn" disabled="{{feedbackSubmitting}}" bindtap="submitFeedback">
-        {{feedbackSubmitting ? '提交中…' : '提交反馈'}}
-      </button>
+    <view class="card-title feedback-header" bindtap="toggleFeedback">
+      <text>问题反馈</text>
+      <text class="fold-arrow {{feedbackOpen ? 'open' : ''}}">›</text>
+    </view>
+    <view class="feedback-body" wx:if="{{feedbackOpen}}">
+      <textarea
+        class="feedback-input"
+        value="{{feedbackText}}"
+        placeholder="请输入您的问题或建议…"
+        placeholder-class="ph"
+        maxlength="500"
+        bindinput="onFeedbackInput"
+      />
+      <view class="feedback-footer">
+        <text class="feedback-count">{{feedbackText.length || 0}}/500</text>
+        <button class="feedback-btn" disabled="{{feedbackSubmitting}}" bindtap="submitFeedback">
+          {{feedbackSubmitting ? '提交中…' : '提交反馈'}}
+        </button>
+      </view>
     </view>
   </view>
 

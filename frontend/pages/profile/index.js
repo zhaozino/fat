@@ -28,7 +28,8 @@ Page({
     maskedPhone: '未登录',
     activityLabels: activityLabels,
     feedbackText: '',
-    feedbackSubmitting: false
+    feedbackSubmitting: false,
+    feedbackOpen: false
   },
 
   onShow: function () {
@@ -116,6 +117,10 @@ Page({
     }).catch(function () {}).then(function () {
       that.setData({ saving: false })
     })
+  },
+
+  toggleFeedback: function () {
+    this.setData({ feedbackOpen: !this.data.feedbackOpen })
   },
 
   onFeedbackInput: function (e) {

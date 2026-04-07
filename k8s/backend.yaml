@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: lightfit
+type: Opaque
+stringData:
+  JWT_SECRET: changeme-must-be-at-least-32-chars-long!!
+  DASHSCOPE_API_KEY: ""
+  SMS_SECRET_ID: ""
+  SMS_SECRET_KEY: ""
+  SMS_APP_ID: ""
+  SMS_TEMPLATE_ID: ""
+  COS_SECRET_ID: ""
+  COS_SECRET_KEY: ""
+  COS_BUCKET: ""
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: lightfit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: lightfit-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: mysql
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: lightfit
+            - name: DB_USER
+              value: root
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: SMS_MOCK_MODE
+              value: "true"
+            - name: SERVER_PORT
+              value: "8080"
+          envFrom:
+            - secretRef:
+                name: backend-secret
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 500m
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            failureThreshold: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: lightfit
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
